@@ -1,9 +1,3 @@
-# Java project files
-**/.vscode/
-**/bin/
-**/lib/
-**/src/
-
 # BlueJ files
 *.ctxt
 

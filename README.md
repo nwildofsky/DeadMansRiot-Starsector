@@ -9,7 +9,7 @@ Zombies in space! Corporate greed! Space terrorism! A fun new weapon and status 
 
 # Mod Requirements
 LazyLib - [Download Here](https://fractalsoftworks.com/forum/index.php?topic=5444.0)  
-MagicLib - [Download Here](https://fractalsoftworks.com/forum/index.php?topic=25868.0)  
+MagicLib - [Download Here](https://fractalsoftworks.com/forum/index.php?topic=25868.0) - [Documentation](https://starsector.fandom.com/wiki/MagicLib)  
 GraphicsLib (Tentative) - [Download Here](https://fractalsoftworks.com/forum/index.php?topic=10982.0)  
 
 # Documentation

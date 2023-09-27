@@ -1,0 +1,18 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // Instructions on how to start vscode debugging are at the bottom of this forum post:
+            // https://fractalsoftworks.com/forum/index.php?topic=19532.0
+            "type": "java",
+            "name": "Attach to Starsector",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005,
+            "preLaunchTask": "${defaultBuildTask}",
+        },
+    ]
+}

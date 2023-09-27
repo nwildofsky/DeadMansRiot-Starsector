@@ -1,3 +1,6 @@
+package scripts;
+
+
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
@@ -12,7 +15,12 @@ import org.lazywizard.console.CommonStrings;
 import org.lazywizard.console.Console;
 
 public class blank implements BaseCommand {
-    
+
+    public void TestIntegration()
+    {
+        Global.getLogger(this.getClass()).info("Running blank through the ModPlugin, integration success!");
+    }
+
     private static void turnTraitorInternal(ShipAPI ship, int newOwner)
     {
         // Switch to the opposite side

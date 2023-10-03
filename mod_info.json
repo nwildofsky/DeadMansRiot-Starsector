@@ -4,5 +4,7 @@
 	"author":"Team Nothing2Lose",
 	"version":"alpha",
 	"description":"Strange signals echo through the void of hyperspace. Cries for help fall on uncaring ears. But they're getting louder. The dead aren't staying that way for long in the Lazarus system, and you've been called in to help... right?\n\nZombies in space! Corporate greed! Space terrorism! A fun new weapon and status effect! All this and more for one easy payment of free-ninety nine!",
-    "gameVersion": "0.96a-RC10"
+    "gameVersion": "0.96a-RC10",
+	"jars": ["JavaWorkspace/JavaWorkspace.jar"],
+	"modPlugin": "modplugin.DeadMansRiotModPlugin"
 }

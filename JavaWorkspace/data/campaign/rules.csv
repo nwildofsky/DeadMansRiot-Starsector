@@ -1,2 +1,14 @@
 id,trigger,conditions,script,text,options,notes
 # DEAD MANS RIOT,,,,,,
+riotBlurb,riot_blurb,,,"""If I'm understanding this correctly, this should pop up on the Mission Description""",,
+riotOption,riot_option,,,,riot_start:Ask about conspiracy,
+riotBlurbBar,riot_blurbBar,,,Click the next options to hear more about the mission,,
+riotOptionBar,riot_optionBar,,,,riot_startBar:This is where you click to hear more about mission,
+riotOfferTextContact,DialogOptionSelected,$option == riot_start,$missionId = riot,"""THERE BE ZOMBIES IN THAT SYSTEM! I SWEARS IT!""","contact_accept:Accept
+contact_decline:Decline",
+,,,,,,
+riotOfferTextBar,DialogOptionSelected,$option == riot_startBar,$missionId = riot,"""You sit next to the raving man. He continues to spout out nonsense""",riot_startBar2:Continue,
+riotOfferTextBar2,DialogOptionSelected,$option == riot_startBar2,SetTextHighlights  $riot_systemName $riot_dist,"""Last known location was the $riot_systemName, $riot_dist light-years away from here. You should start your search there.""
+
+""Will ya do it?""","contact_acceptBar:Accept
+contact_declineBarNoContinue:Decline",

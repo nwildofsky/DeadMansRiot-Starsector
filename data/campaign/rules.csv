@@ -1,36 +1,8 @@
 id,trigger,conditions,script,text,options,notes
-# INTERNAL AFFAIRS,,,,,,
-intaffBlurbBar,intaff_blurbBar,,,"A Tri-Tachyon executive sits alone at a table, quietly drinking wine and looking displeased about whatever's on their Tri-Pad.",,
-intaffOptionBar,intaff_optionBar,,,,intaff_startBar:See what the wine-drinking executive is annoyed about [LOOKING FOR THIS AS WELL],
-intaffOfferTextContact,DialogOptionSelected,$option == intaff_start,$missionId = intaff,"""The prey in question is a disgraced old-guard executive. Second AI War. I'm sure you're well aware of the trouble they caused,"" $heOrShe explains. ""I have orders to ensure this executive is 'dealt with', and I'd rather not inconvenience myself by going up the hierarchy to request a fleet asset. You know how it is.""
-
-""Their last known location was the $intaff_SystemName, $intaff_dist light-years away from here. You should start your search there. I haven't been provided intel on the target's composition, so you're going in blind. Accordingly, I've arranged a payment of $intaff_reward credits.""","contact_accept:Accept
-contact_decline:Decline",
-intaffOfferTextBar,DialogOptionSelected,$option == intaff_startBar,$missionId = intaff,"As you take a seat by the irritated executive, $heOrShe briefly scans you over like a biometrics system, before returning $hisOrHer eyes to the Tri-Pad. ""Judging by what you just did, I'd imagine you're a captain with an eye for potential work. You'd do an excellent job selling contracts.""
-
-$HeOrShe takes a sip. ""Obviously that's not what your here for, and not what I need. You are a predator."" $heOrShe declares. ""I have prey.""",intaff_startBar2:Continue,
-intaffOfferTextBar2,DialogOptionSelected,$option == intaff_startBar2,SetTextHighlights  $intaff_systemName $intaff_dist $intaff_reward ,"""The prey in question is $intaff_execName, a disgraced old-guard executive. Second AI War. I'm sure you're well aware of the trouble they caused,"" $heOrShe explains, waving $hisOrHer hand. ""I have orders to ensure this executive is 'dealt with', and I'd rather not inconvenience myself by going up the hierarchy to request a fleet asset. You know how it is."" $HeOrShe gives you a look that implies you're expected to agree.
-
-""$intaff_execName's last known location was the $intaff_systemName, $intaff_dist light-years away from here. You should start your search there. I haven't been provided intel on the target's composition, so you're going in blind. Accordingly, I've arranged a payment of $intaff_reward credits.""
-
-$HeOrShe places the Tri-Pad face-down on the table, and gives you $hisOrHer full attention for the first time. ""What about it, then? If you can get this done, it'd make an excellent first impression.""","contact_acceptBar:Accept
+# DEAD MANS RIOT,,,,,,
+riotBlurbBar,riot_blurbBar,,,"A bespectacled $riot_manOrWoman with a Tri-Tachyon pin on $riot_hisOrHer satchel sits alone at the bar, staring into $riot_hisOrHer glass with a haunted look in $riot_hisOrHer eyes.",,
+riotOptionBar,riot_optionBar,,,,riot_startBar:Sit next to the harrowed $riot_manOrWoman at the bar,
+riotOfferTextBar,DialogOptionSelected,$option == riot_startBar,$missionId = riot,"The $riot_manOrWoman turns to observe you with an empty stare. $riot_heOrShe recognizes your garb as that of a captain, and life begins to filter back into $riot_hisOrHer eyes. ""Nice night for a drink, yeah? Or..morning, or whatever time it is."" $riot_heOrShe notices you looking at the pin on $riot_hisOrHer satchel, muttering, ""Oh, you don't need to worry about that. I jumped ship a few days ago.""",riot_startBar2:Continue,
+riotOfferTextBar2,DialogOptionSelected,$option == riot_startBar2,SetTextHighlights  $riot_systemName $riot_dist $riot_personName,"Your skittish companion introduces $riot_himOrHerself as $riot_personName, a former employee of Tri-Tachyon, from the nearby Lazarus system. As $riot_heOrShe talks, $riot_hisOrHer focus shifts entirely to you. $riot_heOrShe doesn't even notice when you swipe $riot_hisOrHer untouched glass for yourself. $riot_heOrShe leans in before conspiratorially whispering, ""You've gotta believe me, captain, there's some shady activity going on back there. Dangerously shady. I wasn't high enough on the totem to know just what, but I feel like they'll be more inclined to listen to you than me."" With hope in $riot_hisOrHer gaze, $riot_heOrShe asks, ""Will you help me?""","contact_acceptBar:Accept
 contact_declineBarNoContinue:Decline",
 ,,,,,,
-intaffFoundClueShip,ShowSalvageEntityDetails,"$intaff_clue score:100
-$customType == wreck
-Call $intaff_ref updateData","$global.intaff_foundclue = true
-Call $global.intaff_ref updateStage
-Call $global.intaff_ref unsetClues","Though obviously stripped for supplies and materials, a scant few signals can still be detected from the derelict ship's dying systems. It could not have been abandoned too long ago.
-
-A salvage crew is dispatched, and manage to extract partial fleet logs from a functioning server that record inter-fleet communications discussing a stop in the $intaff_system2Name. $intaff_execName's fleet should be there.",,
-intaffFoundClueCache,ShowSalvageEntityDetails,"$intaff_clue score:100
-$customType == supply_cache
-Call $intaff_ref updateData","$global.intaff_foundclue = true
-Call $global.intaff_ref updateStage
-Call $global.intaff_ref unsetClues","Barely weathered by the usual radiation and impacts of microscopic particles that pose a hazard to exposed cargo pods, it's obvious this supply cache has not been left here for long.
-
-Quick scans manage to pick up a fading signal from one in particular, and once broken open, a Tri-Pad found inside soon yields a fleetwide memo received by $intaff_execName's captains, ordering a stop in the $intaff_system2Name.",,
-,,,,,,
-intaff_fleetOpen,OpenCommLink,$entity.intaff_execfleet score:100,$entity.ignorePlayerCommRequests = true,"$personName frowns. ""They didn't even bother sending internal affairs, did they? That's what happens when you try to make a difference.""
-
-$HeOrShe sighs. ""Tell them I did what had to be done. I only wish I'd done it better.""",cutCommLink:Cut the comm link,

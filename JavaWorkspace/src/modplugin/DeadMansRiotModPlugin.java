@@ -4,6 +4,7 @@ import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
 
 import scripts.*;
+import scripts.world.SystemGen;
 
 public class DeadMansRiotModPlugin extends BaseModPlugin
 {
@@ -15,5 +16,11 @@ public class DeadMansRiotModPlugin extends BaseModPlugin
         // Add initialization scripts
         blank b = new blank();
         b.TestIntegration();
+    }
+
+    @Override
+    public void onNewGame()
+    {
+        new SystemGen().generate(Global.getSector());
     }
 }

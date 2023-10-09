@@ -2,9 +2,15 @@ package modplugin;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
 
 import scripts.*;
 import scripts.world.SystemGen;
+import scripts.campaign.intel.missions.Riot;
+
+import java.util.List;
 
 public class DeadMansRiotModPlugin extends BaseModPlugin
 {

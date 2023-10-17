@@ -80,10 +80,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
         executive.getMemoryWithoutUpdate().set("$riot_exec", true);
 
         // pick the system with the clues inside
-        requireSystemInterestingAndNotUnsafeOrCore();
-        preferSystemInInnerSector();
-        preferSystemUnexplored();
-        preferSystemInDirectionOfOtherMissions();
+        requireSystemIs(Global.getSector().getStarSystem("lazarus"));
 
         system = pickSystem(true);
         if (system == null) return false;

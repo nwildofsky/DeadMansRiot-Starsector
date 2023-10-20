@@ -4,7 +4,6 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
-import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.impl.campaign.DerelictShipEntityPlugin.DerelictType;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
@@ -16,16 +15,11 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.awt.*;
-import java.util.List;
-import java.util.Map;
 
 import static com.fs.starfarer.api.impl.campaign.ids.FleetTypes.PATROL_MEDIUM;
 
 public class Riot extends HubMissionWithBarEvent implements FleetEventListener 
 {
-
-    // time we have to complete the mission
-    public static float MISSION_DAYS = 360f;
 
     // mission stages
     public static enum Stage 
@@ -40,12 +34,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     }
 
     // important objects, systems and people
-    protected SectorEntityToken derelict;
-    protected SectorEntityToken cache;
-    protected CampaignFleetAPI target;
-    protected PersonAPI executive;
+    protected CampaignFleetAPI target; //CHANGE TO TRI-TACH AND ADD LUDDIC FLEETS - Dominic
+    protected PersonAPI executive; //RENAME TO TRI-TACH COMMANDER AND MAKE LUDDIC COMMANDER - Dominic
     protected StarSystemAPI system;
-    protected StarSystemAPI system2;
 
     // Mission only spawns in Tri-Tach bars
     public boolean shouldShowAtMarket(MarketAPI market) {
@@ -53,15 +44,15 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     }
 
     // run when the bar event starts / when we ask a contact about the mission
-    protected boolean create(MarketAPI createdAt, boolean barEvent) {
-
+    protected boolean create(MarketAPI createdAt, boolean barEvent) 
+    {
 
         setGiverRank(Ranks.AGENT);
-        setGiverPost(Ranks.POST_EXECUTIVE);
+        setGiverPost(Ranks.POST_EXECUTIVE); //DOES THIS POST MAKE SENSE? - Dominic
         setGiverImportance(PersonImportance.HIGH);
         setGiverFaction(Factions.TRITACHYON);
         setGiverTags(Tags.CONTACT_UNDERWORLD);
-        setGiverVoice(Voices.BUSINESS);
+        setGiverVoice(Voices.BUSINESS); //I SHOULD LOOK INTO CHANGING THIS VOICE - Dominic
         findOrCreateGiver(createdAt, false, false);
         
 
@@ -76,39 +67,22 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
         setGiverIsPotentialContactOnSuccess(1f);
 
+        //NEED TO CHANGE THIS TO A TRI-TACH COMMANDER AND ALSO ADD A LUDDIC COMMANDER - Dominic
         // set up the disgraced executive
         executive = Global.getSector().getFaction(Factions.TRITACHYON).createRandomPerson();
         executive.setRankId(Ranks.SPACE_ADMIRAL);
         executive.setPostId(Ranks.POST_SENIOR_EXECUTIVE);
         executive.getMemoryWithoutUpdate().set("$riot_exec", true);
 
-        // pick the system with the clues inside
+        // Get the Lazarus system
         requireSystemIs(Global.getSector().getStarSystem("lazarus"));
 
         system = pickSystem(true);
         if (system == null) return false;
 
-        // pick the target fleet's system
-        requireSystemInterestingAndNotUnsafeOrCore();
-        preferSystemWithinRangeOf(system.getLocation(), 3f);
-        preferSystemUnexplored();
-        requireSystemNot(system);
 
-        system2 = pickSystem(true);
-        if (system2 == null) return false;
-
-        // determine the faction and ship type of the derelict
-        String derelict_faction = Factions.TRITACHYON;
-        DerelictType derelict_type = DerelictType.CIVILIAN;
-
-        // spawn a supply cache and derelict ship, both serving as clues. They have memory flags that are checked for in rules.csv
-        cache = spawnEntity(Entities.SUPPLY_CACHE, new LocData(EntityLocationType.HIDDEN, null, system));
-        derelict = spawnDerelict(derelict_faction, derelict_type, new LocData(EntityLocationType.HIDDEN, null, system));
-        cache.getMemoryWithoutUpdate().set("$riot_clue", true);
-        setEntityMissionRef(cache, "$riot_ref");
-        derelict.getMemoryWithoutUpdate().set("$riot_clue", true);
-        setEntityMissionRef(derelict, "$riot_ref");
-
+        //TEMPLATE FOR MAKING THE TRI-TACH AND LUDDIC FLEETS. WILL BE REPLACED SOON ENOUGH - Dominic
+        
         // set up the target fleet. I've done this using the old style, because the trigger-system doesn't support event listeners by default,
         // and we need to know when this fleet dies or despawns
         FleetParamsV3 params = new FleetParamsV3(
@@ -145,9 +119,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         target.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, "$riot");
 
         target.getMemoryWithoutUpdate().set("$riot_execfleet", true);
-        target.getAI().addAssignment(FleetAssignment.PATROL_SYSTEM, system2.getCenter(), 200f, null);
+        target.getAI().addAssignment(FleetAssignment.PATROL_SYSTEM, system.getCenter(), 200f, null);
         target.addEventListener(this);
-        system2.addEntity(target);
+        system.addEntity(target);
 
         // set a global reference we can use, useful for once-off missions.
         if (!setGlobalReference("$riot_ref")) return false;
@@ -166,23 +140,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         setCreditReward(CreditReward.HIGH);
 
         return true;
-    }
-
-    // when Call-ing something that isn't a default option for a mission, it'll try and run this method with "action" being the first parameter
-    // e.g Call $global.riot_ref unsetClues
-    @Override
-    protected boolean callAction(String action, String ruleId, InteractionDialogAPI dialog, List<Misc.Token> params, Map<String, MemoryAPI> memoryMap) {
-        if (action.equals("unsetClues")){
-            // make the other clue no longer a clue
-            if (cache != null) {
-                cache.getMemoryWithoutUpdate().unset("$riot_clue");
-            }
-            if (derelict != null) {
-                derelict.getMemoryWithoutUpdate().unset("$riot_clue");
-            }
-            return true;
-        }
-        return false;
     }
 
     // during the initial dialogue and in any dialogue where we use "Call $intaff_ref updateData", these values will be put in memory
@@ -269,12 +226,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
     // where on the map the intel screen tells us to go
     @Override
-    public SectorEntityToken getMapLocation(SectorMapAPI map) {
-        if (currentStage == Stage.REACH_SYSTEM) {
+    public SectorEntityToken getMapLocation(SectorMapAPI map) 
+    {
+        if (currentStage == Stage.REACH_SYSTEM) 
             return getMapLocationFor(system.getCenter());
-        } else if (currentStage == Stage.JOIN_BATTLE) {
-            return getMapLocationFor(system2.getCenter());
-        }
+        else if (currentStage == Stage.JOIN_BATTLE) 
+            return getMapLocationFor(system.getCenter());
         return null;
     }
 

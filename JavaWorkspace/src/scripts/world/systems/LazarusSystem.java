@@ -8,15 +8,16 @@ import java.util.concurrent.locks.Condition;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
+import com.fs.starfarer.api.campaign.ai.CampaignFleetAIAPI.EncounterOption;
 import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.econ.Industry.AICoreDescriptionMode;
-import com.fs.starfarer.api.campaign.econ.Industry.IndustryTooltipMode;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.SurveyLevel;
 import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.combat.ShipCommand;
+import com.fs.starfarer.api.fleet.FleetMemberType;
+import com.fs.starfarer.api.impl.campaign.FleetEncounterContext;
 import com.fs.starfarer.api.impl.campaign.DerelictShipEntityPlugin.DerelictShipData;
 import com.fs.starfarer.api.impl.campaign.ids.*;
 import com.fs.starfarer.api.impl.campaign.procgen.NebulaEditor;
@@ -32,12 +33,10 @@ import com.fs.starfarer.api.impl.campaign.terrain.DebrisFieldTerrainPlugin.Debri
 import com.fs.starfarer.api.impl.campaign.terrain.DebrisFieldTerrainPlugin.DebrisFieldSource;
 import com.fs.starfarer.api.impl.campaign.terrain.HyperspaceTerrainPlugin;
 import com.fs.starfarer.api.util.Misc;
-import com.fs.starfarer.api.impl.campaign.terrain.MagneticFieldTerrainPlugin.MagneticFieldParams;
-import com.fs.starfarer.api.ui.BaseTooltipCreator;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 
 import org.lazywizard.lazylib.MathUtils;
 import org.magiclib.util.MagicCampaign;
+import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 public class LazarusSystem
 {
@@ -48,6 +47,7 @@ public class LazarusSystem
     final float yureiDist = 3600f;
     final float stationDist = 380f;
     final float jumpPointDist = 4500f;
+    final float fleetCombatDist = 4000f;
     final float shipwreckJumpDist = 350f;
     final float wreckDebrisJumpDist = shipwreckJumpDist + 20f;
     final float shipwreckStarDist = 1200f;
@@ -55,6 +55,18 @@ public class LazarusSystem
     final float gateDist = 6800f;
 
     //final float majorisRad = 670f;
+
+    static SectorEntityToken fleetCombatLoc1;
+    static SectorEntityToken fleetCombatLoc2;
+
+    public static SectorEntityToken GetCombatLoc1()
+    {
+        return fleetCombatLoc1;
+    }
+    public static SectorEntityToken GetCombatLoc2()
+    {
+        return fleetCombatLoc2;
+    }
 
     public void generate(SectorAPI sector)
     {
@@ -180,9 +192,9 @@ public class LazarusSystem
 
         //#region Jump Points ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         int randSign = Math.random() > 0.5 ? 1 : -1;
-        float jumpPointAngle = (planetAngle + 180 * randSign) % 360f;
+        float jumpPointAngle = (planetAngle + 150 * randSign) % 360f;
         JumpPointAPI jumpPoint = Global.getFactory().createJumpPoint("lazarus_jump", "Lazarus System Jump");
-        jumpPoint.setCircularOrbit(system.getEntityById("Erythema"), jumpPointAngle, jumpPointDist, 4000f);
+        jumpPoint.setCircularOrbit(system.getEntityById("Erythema"), jumpPointAngle, jumpPointDist, 400f);
         jumpPoint.setStandardWormholeToHyperspaceVisual();
 
         system.addEntity(jumpPoint);
@@ -238,6 +250,14 @@ public class LazarusSystem
 		debrisBNextToStar.setId("lazarus_debrisBNextToStar");
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        //#region Fleets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        float fleetCombatAngle = planetAngle + ((90f * (float)Math.random() + 30f) * randSign) % 360f;
+        fleetCombatLoc1 = system.addCustomEntity("fleet_combat_loc", null, "mission_location", null);
+		fleetCombatLoc1.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist - 50, 310f);
+        fleetCombatLoc2 = system.addCustomEntity("fleet_combat_loc", null, "mission_location", null);
+		fleetCombatLoc2.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist + 50, 310f);
+        //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
         StarSystemGenerator.addSystemwideNebula(system, StarAge.OLD);
         system.autogenerateHyperspaceJumpPoints(true, false);
@@ -251,6 +271,7 @@ public class LazarusSystem
         nEditor.clearArc(system.getLocation().x, system.getLocation().y, 0, hyperRadius + minHyperRadius, 0, 360f, 0.25f);
     }
 
+    // Vanilla API function grabbed from Galatia.java
     protected SectorEntityToken addDerelict(StarSystemAPI system, SectorEntityToken focus, String variantId, 
 								ShipCondition condition, float orbitRadius, boolean recoverable) {
 		DerelictShipData params = new DerelictShipData(new PerShipData(variantId, condition, 0f), false);

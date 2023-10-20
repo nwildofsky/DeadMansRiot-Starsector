@@ -154,6 +154,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
         // set our starting, success and failure stages
         setStartingStage(Stage.REACH_SYSTEM);
+        setStageOnEnteredLocation(Stage.JOIN_BATTLE, system);
         setSuccessStage(Stage.COMPLETED);
         setFailureStage(Stage.FAILED);
 
@@ -242,15 +243,11 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         float opad = 10f;
         Color h = Misc.getHighlightColor();
         if (currentStage == Stage.REACH_SYSTEM) {
-            info.addPara("Look for clues as to the disgraced executive's location in the " +
+            info.addPara("Investigate the " +
                     system.getNameWithLowercaseTypeShort() + ".", opad);
         } else if (currentStage == Stage.JOIN_BATTLE) {
-            info.addPara("Hunt down and eliminate the disgraced executive in the " +
-                    system2.getNameWithLowercaseTypeShort() + ".", opad);
-        }
-        if (isDevMode()) {
-            info.addPara("DEVMODE: EXECUTIVE IS LOCATED IN THE " +
-                    system2.getNameWithLowercaseTypeShort() + ".", opad);
+            info.addPara("Find out who else is in the " +
+                    system.getNameWithLowercaseTypeShort() + ".", opad);
         }
     }
 
@@ -259,12 +256,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     public boolean addNextStepText(TooltipMakerAPI info, Color tc, float pad) {
         Color h = Misc.getHighlightColor();
         if (currentStage == Stage.REACH_SYSTEM) {
-            info.addPara("Look for clues in the " +
+            info.addPara("Reach the " +
                     system.getNameWithLowercaseTypeShort(), tc, pad);
             return true;
         } else if (currentStage == Stage.JOIN_BATTLE) {
-            info.addPara("Hunt down the disgraced executive in the " +
-                    system2.getNameWithLowercaseTypeShort(), tc, pad);
+            info.addPara("Search the " +
+                    system.getNameWithLowercaseTypeShort()  + " for other signs of life.", tc, pad);
             return true;
         }
         return false;

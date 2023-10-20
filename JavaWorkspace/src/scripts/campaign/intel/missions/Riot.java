@@ -21,17 +21,20 @@ import java.util.Map;
 
 import static com.fs.starfarer.api.impl.campaign.ids.FleetTypes.PATROL_MEDIUM;
 
-public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
+public class Riot extends HubMissionWithBarEvent implements FleetEventListener 
+{
 
-    // chance of also spawning a Remnant fleet
-    public static float PROB_REMNANT = 0.5f;
     // time we have to complete the mission
-    public static float MISSION_DAYS = 120f;
+    public static float MISSION_DAYS = 360f;
 
     // mission stages
-    public static enum Stage {
-        FIND_CLUE,
-        KILL_FLEET,
+    public static enum Stage 
+    {
+        REACH_SYSTEM,
+        JOIN_BATTLE,
+        RAID_PLANET,
+        DEFEND_SELF,
+        CONTACT_GIVER,
         COMPLETED,
         FAILED,
     }
@@ -44,7 +47,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
     protected StarSystemAPI system;
     protected StarSystemAPI system2;
 
-    // whether the bar event show should at any given market
+    // Mission only spawns in Tri-Tach bars
     public boolean shouldShowAtMarket(MarketAPI market) {
         return market.getFactionId().equals(Factions.TRITACHYON);
     }
@@ -57,7 +60,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
         setGiverPost(Ranks.POST_EXECUTIVE);
         setGiverImportance(PersonImportance.HIGH);
         setGiverFaction(Factions.TRITACHYON);
-        setGiverTags(Tags.CONTACT_MILITARY);
+        setGiverTags(Tags.CONTACT_UNDERWORLD);
         setGiverVoice(Voices.BUSINESS);
         findOrCreateGiver(createdAt, false, false);
         
@@ -150,16 +153,15 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
         if (!setGlobalReference("$riot_ref")) return false;
 
         // set our starting, success and failure stages
-        setStartingStage(Stage.FIND_CLUE);
+        setStartingStage(Stage.REACH_SYSTEM);
         setSuccessStage(Stage.COMPLETED);
         setFailureStage(Stage.FAILED);
 
         // set stage transitions when certain global flags are set, and when certain flags are set on the questgiver
-        setStageOnGlobalFlag(Stage.KILL_FLEET, "$riot_foundclue");
+        setStageOnGlobalFlag(Stage.JOIN_BATTLE, "$riot_reachedlazarus");
         setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
         setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
         // set time limit and credit reward
-        setTimeLimit(Stage.FAILED, MISSION_DAYS, system2);
         setCreditReward(CreditReward.HIGH);
 
         return true;
@@ -239,10 +241,10 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
     public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
         float opad = 10f;
         Color h = Misc.getHighlightColor();
-        if (currentStage == Stage.FIND_CLUE) {
+        if (currentStage == Stage.REACH_SYSTEM) {
             info.addPara("Look for clues as to the disgraced executive's location in the " +
                     system.getNameWithLowercaseTypeShort() + ".", opad);
-        } else if (currentStage == Stage.KILL_FLEET) {
+        } else if (currentStage == Stage.JOIN_BATTLE) {
             info.addPara("Hunt down and eliminate the disgraced executive in the " +
                     system2.getNameWithLowercaseTypeShort() + ".", opad);
         }
@@ -256,11 +258,11 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
     @Override
     public boolean addNextStepText(TooltipMakerAPI info, Color tc, float pad) {
         Color h = Misc.getHighlightColor();
-        if (currentStage == Stage.FIND_CLUE) {
+        if (currentStage == Stage.REACH_SYSTEM) {
             info.addPara("Look for clues in the " +
                     system.getNameWithLowercaseTypeShort(), tc, pad);
             return true;
-        } else if (currentStage == Stage.KILL_FLEET) {
+        } else if (currentStage == Stage.JOIN_BATTLE) {
             info.addPara("Hunt down the disgraced executive in the " +
                     system2.getNameWithLowercaseTypeShort(), tc, pad);
             return true;
@@ -271,9 +273,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener {
     // where on the map the intel screen tells us to go
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) {
-        if (currentStage == Stage.FIND_CLUE) {
+        if (currentStage == Stage.REACH_SYSTEM) {
             return getMapLocationFor(system.getCenter());
-        } else if (currentStage == Stage.KILL_FLEET) {
+        } else if (currentStage == Stage.JOIN_BATTLE) {
             return getMapLocationFor(system2.getCenter());
         }
         return null;

@@ -252,10 +252,14 @@ public class LazarusSystem
 
         //#region Fleets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         float fleetCombatAngle = planetAngle + ((90f * (float)Math.random() + 30f) * randSign) % 360f;
+
         fleetCombatLoc1 = system.addCustomEntity("fleet_combat_loc", null, "mission_location", null);
 		fleetCombatLoc1.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist - 50, 310f);
+        system.removeEntity(fleetCombatLoc1);
+
         fleetCombatLoc2 = system.addCustomEntity("fleet_combat_loc", null, "mission_location", null);
 		fleetCombatLoc2.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist + 50, 310f);
+        system.removeEntity(fleetCombatLoc2);
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

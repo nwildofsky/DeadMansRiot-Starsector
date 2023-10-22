@@ -1,9 +1,9 @@
 {
-	"id":"heatseeker_mrm",
+	"id":"berserker_mrm",
 	"specClass":"missile",	
 	"missileType":"HEATSEEKER",
 	"sprite":"graphics/missiles/missile_salamander.png",
-	"onHitEffect":"JavaWorkspace.src.scripts.plugins.BerserkTriggerEffect",
+	"onHitEffect":"scripts.plugins.BerserkTriggerEffect",
 	"size":[11,22],	
 	"center":[5.5,11],
 	"collisionRadius":16,

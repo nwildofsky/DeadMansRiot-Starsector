@@ -10,7 +10,7 @@ import com.fs.starfarer.api.mission.FleetSide;
 import org.lazywizard.lazylib.combat.AIUtils;
 
 
-import org.lazywizard.console.BaseCommand;
+import org.lazywizard.console.*;
 import org.lazywizard.console.CommonStrings;
 import org.lazywizard.console.Console;
 

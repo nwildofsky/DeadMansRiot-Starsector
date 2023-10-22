@@ -18,6 +18,11 @@ import com.fs.starfarer.api.util.IntervalUtil;
 
 public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin implements OnHitEffectPlugin {
 
+    public void TestIntegration()
+    {
+        Global.getLogger(this.getClass()).info("Running blank through the ModPlugin, integration success!");
+    }
+
     protected IntervalUtil interval;
     protected float upTime = 0.0f;
 
@@ -30,7 +35,9 @@ public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin imple
         if (!hitShield) {
             if (target instanceof ShipAPI && upTime <= 10f) {
 
-                ShipAPI hitTarget = ((ShipAPI) target).getShipTarget();
+                ShipAPI hitTarget = ((ShipAPI) target);
+
+                int hitTeam = hitTarget.getOwner();
 
                 ShipAPI nearestShip = AIUtils.getNearestShip(target);
 
@@ -42,7 +49,7 @@ public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin imple
                 }
 
                 if(upTime >= 10f){
-                    target.setOwner(1);
+                    target.setOwner(hitTeam);
                     upTime = 0f;
                 }
 
@@ -96,6 +103,7 @@ public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin imple
     public static void turnTraitor(ShipAPI ship) {
         // Switch squadmates if this is a fighter wing
         final int newOwner = (ship.getOwner() == 0 ? 1 : 0);
+
         if (ship.isFighter() && !ship.isDrone()) {
             for (ShipAPI member : ship.getWing().getWingMembers()) {
                 turnTraitorInternal(member, newOwner);

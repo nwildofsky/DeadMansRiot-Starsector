@@ -1,0 +1,11 @@
+id,trigger,conditions,script,text,options,notes
+# DEAD MANS RIOT,,,,,,
+riotBlurbBar,riot_blurbBar,,,"A bespectacled $riot_manOrWoman with a Tri-Tachyon pin on $riot_hisOrHer satchel sits alone at the bar, staring into $riot_hisOrHer glass with a haunted look in $riot_hisOrHer eyes.",,
+riotOptionBar,riot_optionBar,,,,riot_startBar:Sit next to the harrowed $riot_manOrWoman at the bar,
+riotOfferTextBar,DialogOptionSelected,$option == riot_startBar,$missionId = riot,"The $riot_manOrWoman turns to observe you with an empty stare. $riot_heOrShe recognizes your garb as that of a captain, and life begins to filter back into $riot_hisOrHer eyes. ""Nice night for a drink, yeah? Or..morning, or whatever time it is."" $riot_heOrShe notices you looking at the pin on $riot_hisOrHer satchel, muttering, ""Oh, you don't need to worry about that. I jumped ship a few days ago.""",riot_startBar2:Continue,
+riotOfferTextBar2,DialogOptionSelected,$option == riot_startBar2,SetTextHighlights  $riot_systemName $riot_dist $riot_personName,"Your skittish companion introduces $riot_himOrHerself as $riot_personName, a former employee of Tri-Tachyon, from the nearby $riot_systemName. As $riot_heOrShe talks, $riot_hisOrHer focus shifts entirely to you. $riot_heOrShe doesn't even notice when you swipe $riot_hisOrHer untouched glass for yourself. $riot_heOrShe leans in before conspiratorially whispering, ""You've gotta believe me, captain, there's some shady activity going on back there. Dangerously shady. I wasn't high enough on the totem to know just what, but I feel like they'll be more inclined to listen to you than me."" With hope in $riot_hisOrHer gaze, $riot_heOrShe asks, ""Will you help me?""","contact_acceptBar:Accept
+contact_declineBarNoContinue:Decline",
+,,,,,,
+riot_fleetOpen,OpenCommLink,$entity.riot_execfleet score:100,$entity.ignorePlayerCommRequests = true,"$personName frowns. ""They didn't even bother sending internal affairs, did they? That's what happens when you try to make a difference.""
+
+$HeOrShe sighs. ""Tell them I did what had to be done. I only wish I'd done it better.""",cutCommLink:Cut the comm link,

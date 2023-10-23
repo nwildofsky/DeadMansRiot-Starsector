@@ -87,7 +87,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
         //TEMPLATE FOR MAKING THE TRI-TACH AND LUDDIC FLEETS. WILL BE REPLACED SOON ENOUGH - Dominic
         
-        tritachyonFleet = Global.getFactory().createEmptyFleet(Factions.TRITACHYON, "Lazarus Tri-Tachyon Fleet", false);
+        tritachyonFleet = Global.getFactory().createEmptyFleet(Factions.TRITACHYON, "Lazarus Tri-Tachyon Fleet", true);
         CampaignUtils.addShipToFleet("aurora_Balanced", FleetMemberType.SHIP, tritachyonFleet);
         CampaignUtils.addShipToFleet("medusa_CS", FleetMemberType.SHIP, tritachyonFleet);
         CampaignUtils.addShipToFleet("harbinger_Strike", FleetMemberType.SHIP, tritachyonFleet);
@@ -96,12 +96,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         CampaignUtils.addShipToFleet("wolf_Strike", FleetMemberType.SHIP, tritachyonFleet);
         CampaignUtils.addShipToFleet("wolf_Strike", FleetMemberType.SHIP, tritachyonFleet);
         CampaignUtils.addShipToFleet("wolf_PD", FleetMemberType.SHIP, tritachyonFleet);
+
         tritachyonFleet.setLocation(LazarusSystem.GetCombatLoc1().getLocation().x, LazarusSystem.GetCombatLoc1().getLocation().y);
-        //tritachFleet.setCircularOrbitPointingDown(fleetCombatLoc1, 0, 0, 0);
         tritachyonFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc1(), 1000000f);
-        //tritachFleet.setAI(null);
-        //tritachFleet.setNoEngaging(1000000f);
-        //tritachFleet.setDoNotAdvanceAI(true);
         tritachyonFleet.setNoFactionInName(true);
         tritachyonFleet.forceSync();
         tritachyonFleet.getFleetData().setSyncNeeded();
@@ -112,10 +109,14 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         // tritachFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
         // tritachFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
         tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachfleet", true);
+        tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
+        tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
         tritachyonFleet.setTransponderOn(true);
+
         system.addEntity(tritachyonFleet);
 
-        luddicpathFleet = Global.getFactory().createEmptyFleet(Factions.LUDDIC_PATH, "Lazarus Luddic Path Fleet", false);
+        luddicpathFleet = Global.getFactory().createEmptyFleet(Factions.LUDDIC_PATH, "Lazarus Luddic Path Fleet", true);
         CampaignUtils.addShipToFleet("venture_pather_Attack", FleetMemberType.SHIP, luddicpathFleet);
         CampaignUtils.addShipToFleet("colossus2_Pather", FleetMemberType.SHIP, luddicpathFleet);
         CampaignUtils.addShipToFleet("manticore_luddic_path_Strike", FleetMemberType.SHIP, luddicpathFleet);
@@ -129,22 +130,18 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         CampaignUtils.addShipToFleet("kite_luddic_path_Raider", FleetMemberType.SHIP, luddicpathFleet);
         CampaignUtils.addShipToFleet("hound_luddic_path_Attack", FleetMemberType.SHIP, luddicpathFleet);
         CampaignUtils.addShipToFleet("hound_luddic_path_Attack", FleetMemberType.SHIP, luddicpathFleet);
-        //patherFleet.setCircularOrbitPointingDown(fleetCombatLoc2, 0, 0, 0);
+
         luddicpathFleet.setLocation(LazarusSystem.GetCombatLoc2().getLocation().x, LazarusSystem.GetCombatLoc2().getLocation().y);
         luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
-        //patherFleet.setAI(null);
-        //patherFleet.setNoEngaging(1000000f);
-        //patherFleet.setDoNotAdvanceAI(true);
         luddicpathFleet.setNoFactionInName(true);
         luddicpathFleet.forceSync();
         luddicpathFleet.getFleetData().setSyncNeeded();
         luddicpathFleet.getFleetData().syncIfNeeded();
-        //patherFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, true);
-        //patherFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE_ONE_BATTLE_ONLY, true);
-        // patherFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
-        // patherFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
-        // patherFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
+        luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
+        luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
         luddicpathFleet.setTransponderOn(true);
+
         system.addEntity(luddicpathFleet);
 
         // set a global reference we can use, useful for once-off missions.

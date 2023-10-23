@@ -6,6 +6,6 @@ riotOfferTextBar,DialogOptionSelected,$option == riot_startBar,$missionId = riot
 riotOfferTextBar2,DialogOptionSelected,$option == riot_startBar2,SetTextHighlights  $riot_systemName $riot_dist $riot_personName,"Your skittish companion introduces $riot_himOrHerself as $riot_personName, a former employee of Tri-Tachyon, from the nearby $riot_systemName. As $riot_heOrShe talks, $riot_hisOrHer focus shifts entirely to you. $riot_heOrShe doesn't even notice when you swipe $riot_hisOrHer untouched glass for yourself. $riot_heOrShe leans in before conspiratorially whispering, ""You've gotta believe me, captain, there's some shady activity going on back there. Dangerously shady. I wasn't high enough on the totem to know just what, but I feel like they'll be more inclined to listen to you than me."" With hope in $riot_hisOrHer gaze, $riot_heOrShe asks, ""Will you help me?""","contact_acceptBar:Accept
 contact_declineBarNoContinue:Decline",
 ,,,,,,
-riot_fleetOpen,OpenCommLink,$entity.riot_execfleet score:100,$entity.ignorePlayerCommRequests = true,"$personName frowns. ""They didn't even bother sending internal affairs, did they? That's what happens when you try to make a difference.""
+riot_fleetOpen,OpenCommLink,$entity.riot_tritachfleet score:100,$entity.ignorePlayerCommRequests = true,"$personName frowns. ""They didn't even bother sending internal affairs, did they? That's what happens when you try to make a difference.""
 
 $HeOrShe sighs. ""Tell them I did what had to be done. I only wish I'd done it better.""",cutCommLink:Cut the comm link,

@@ -111,6 +111,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         // tritachFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
         // tritachFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
         // tritachFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
+        tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachfleet", true);
         tritachyonFleet.setTransponderOn(true);
         system.addEntity(tritachyonFleet);
 

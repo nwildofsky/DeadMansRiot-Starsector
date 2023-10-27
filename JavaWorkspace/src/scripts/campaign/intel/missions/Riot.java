@@ -9,6 +9,7 @@ import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.*;
+import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -39,7 +40,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     // important objects, systems and people
     protected CampaignFleetAPI tritachyonFleet; //CHANGE TO TRI-TACH AND ADD LUDDIC FLEETS - Dominic
     protected CampaignFleetAPI luddicpathFleet;
-    protected PersonAPI executive; //RENAME TO TRI-TACH COMMANDER AND MAKE LUDDIC COMMANDER - Dominic
+    protected PersonAPI tritachyonCommander; //RENAME TO TRI-TACH COMMANDER AND MAKE LUDDIC COMMANDER - Dominic
+    protected PersonAPI luddicpathCommander; //RENAME TO TRI-TACH COMMANDER AND MAKE LUDDIC COMMANDER - Dominic
     protected StarSystemAPI system;
 
     // Mission only spawns in Tri-Tach bars
@@ -73,10 +75,15 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
         //NEED TO CHANGE THIS TO A TRI-TACH COMMANDER AND ALSO ADD A LUDDIC COMMANDER - Dominic
         // set up the disgraced executive
-        executive = Global.getSector().getFaction(Factions.TRITACHYON).createRandomPerson();
-        executive.setRankId(Ranks.SPACE_ADMIRAL);
-        executive.setPostId(Ranks.POST_SENIOR_EXECUTIVE);
-        executive.getMemoryWithoutUpdate().set("$riot_exec", true);
+        tritachyonCommander = Global.getSector().getFaction(Factions.TRITACHYON).createRandomPerson();
+        tritachyonCommander.setRankId(Ranks.SPACE_ADMIRAL);
+        tritachyonCommander.setPostId(Ranks.POST_AGENT);
+        tritachyonCommander.getMemoryWithoutUpdate().set("$riot_tritachComm", true);
+
+        luddicpathCommander = Global.getSector().getFaction(Factions.LUDDIC_PATH).createRandomPerson();
+        luddicpathCommander.setRankId(Ranks.BROTHER);
+        luddicpathCommander.setPostId(Ranks.POST_TERRORIST);
+        luddicpathCommander.getMemoryWithoutUpdate().set("$riot_luddicpathComm", true);
 
         // Get the Lazarus system
         requireSystemIs(Global.getSector().getStarSystem("lazarus"));
@@ -88,6 +95,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         //TEMPLATE FOR MAKING THE TRI-TACH AND LUDDIC FLEETS. WILL BE REPLACED SOON ENOUGH - Dominic
         
         tritachyonFleet = Global.getFactory().createEmptyFleet(Factions.TRITACHYON, "Lazarus Tri-Tachyon Fleet", true);
+        //tritachyonFleet.setCommander(tritachyonCommander);
         CampaignUtils.addShipToFleet("aurora_Balanced", FleetMemberType.SHIP, tritachyonFleet);
         CampaignUtils.addShipToFleet("medusa_CS", FleetMemberType.SHIP, tritachyonFleet);
         CampaignUtils.addShipToFleet("harbinger_Strike", FleetMemberType.SHIP, tritachyonFleet);
@@ -111,12 +119,14 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachfleet", true);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
         tritachyonFleet.setTransponderOn(true);
 
         system.addEntity(tritachyonFleet);
 
         luddicpathFleet = Global.getFactory().createEmptyFleet(Factions.LUDDIC_PATH, "Lazarus Luddic Path Fleet", true);
+        //luddicpathFleet.setCommander(luddicpathCommander);
         CampaignUtils.addShipToFleet("venture_pather_Attack", FleetMemberType.SHIP, luddicpathFleet);
         CampaignUtils.addShipToFleet("colossus2_Pather", FleetMemberType.SHIP, luddicpathFleet);
         CampaignUtils.addShipToFleet("manticore_luddic_path_Strike", FleetMemberType.SHIP, luddicpathFleet);
@@ -137,8 +147,10 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         luddicpathFleet.forceSync();
         luddicpathFleet.getFleetData().setSyncNeeded();
         luddicpathFleet.getFleetData().syncIfNeeded();
+        luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathFleet", true);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
         luddicpathFleet.setTransponderOn(true);
 
@@ -174,7 +186,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         set("$riot_reward", Misc.getWithDGS(getCreditsReward()));
 
         set("$riot_personName", getPerson().getNameString());
-        set("$riot_execName", executive.getNameString());
+        set("$riot_tritachCommName", tritachyonCommander.getNameString());
+        set("$riot_luddicpathCommName", luddicpathCommander.getNameString());
         set("$riot_systemName", system.getNameWithLowercaseTypeShort());
         set("$riot_dist", getDistanceLY(system));
     }
@@ -199,7 +212,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason, Object param) {
         if (isDone() || result != null) return;
 
-        if (fleet.getMemoryWithoutUpdate().contains("$riot_execfleet")) {
+        if (fleet.getMemoryWithoutUpdate().contains("$riot_tritachfleet")) {
             getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
         }
     }

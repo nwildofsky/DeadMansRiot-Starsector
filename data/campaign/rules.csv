@@ -25,3 +25,4 @@ $global.riot_allySelected = true
 AdjustRepActivePerson COOPERATIVE 75
 AdjustRep $faction.id FRIENDLY 75
 Call $global.riot_ref updateStage","""Aye, there's hope for this system yet! Show no mercy, for none shall be given to you!""",cutCommLink:Cut the comm link,
+,,,,,,

@@ -44,10 +44,10 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     // important objects, systems and people
     protected CampaignFleetAPI tritachyonFleet;
     protected CampaignFleetAPI luddicpathFleet;
+    protected CampaignFleetAPI winningFleet;
     protected PersonAPI tritachyonCommander;
     protected PersonAPI luddicpathCommander;
     protected StarSystemAPI system;
-    protected BattleAPI firstBattle;
     protected boolean createdFleets = false;
 
     // Mission only spawns in Tri-Tach bars
@@ -169,6 +169,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
         // set stage transitions when certain global flags are set, and when certain flags are set on the questgiver
         setStageOnGlobalFlag(Stage.JOIN_BATTLE, "$riot_allySelected");
+        setStageOnMemoryFlag(Stage.AFTER_ACTION_REPORT, person, "$riot_afteraction");
         setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
         setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
         // set time limit and credit reward
@@ -219,8 +220,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
     }
 
-    // during the initial dialogue and in any dialogue where we use "Call $intaff_ref updateData", these values will be put in memory
-    // here, used so we can, say, type $intaff_execName and automatically insert the disgraced executive's name
+    // during the initial dialogue and in any dialogue where we use "Call $riot_ref updateData", these values will be put in memory
+    // here, used so we can, say, type $riot_personName and automatically insert the quest giver's name
+    //It's supposed to do that, but sometimes it will decide not to :)
     protected void updateInteractionDataImpl() {
         set("$riot_barEvent", isBarEvent());
         set("$riot_manOrWoman", getPerson().getManOrWoman());
@@ -236,13 +238,39 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         set("$riot_dist", getDistanceLY(system));
     }
 
-    // used to detect when the executive's fleet is destroyed and complete the mission
     public void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle) {
         if (isDone() || result != null) return;
 
         // also credit the player if they're in the same location as the fleet and nearby
         float distToPlayer = Misc.getDistance(fleet, Global.getSector().getPlayerFleet());
         boolean playerInvolved = battle.isPlayerInvolved() || (fleet.isInCurrentLocation() && distToPlayer < 2000f);
+
+        //If it's a battle between the two fleets
+        //NOTE: I'M PRETTY SURE THIS DOESN'T DO WHAT I WANT IT TO, THEREFORE IT'S COMMENTED OUT.
+        /*
+        if(battle.isInvolved(tritachyonFleet) && battle.isInvolved(luddicpathFleet))
+        {
+            if(primaryWinner.equals(tritachyonFleet))
+            {
+                winningFleet = tritachyonFleet;
+                getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
+                tritachyonFleet.getMemoryWithoutUpdate().set("$riot_survived", true);
+                tritachyonFleet.removeFirstAssignment();
+                tritachyonFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc1(), 1000000f);
+                return;
+            }
+            if(primaryWinner.equals(luddicpathFleet))
+            {
+                winningFleet = luddicpathFleet;
+                getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
+                luddicpathFleet.getMemoryWithoutUpdate().set("$riot_survived", true);
+                luddicpathFleet.removeFirstAssignment();
+                luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
+                return;
+            }
+        }
+        */
+
 
         if (!playerInvolved || !battle.isInvolved(fleet) || battle.onPlayerSide(fleet)) {
             return;
@@ -263,6 +291,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
         float opad = 10f;
         Color h = Misc.getHighlightColor();
+        //This is about how far I have the quest working reliably
         if (currentStage == Stage.REACH_SYSTEM) {
             info.addPara("Investigate the " +
                     system.getNameWithLowercaseTypeShort() + ".", opad);
@@ -279,6 +308,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     @Override
     public boolean addNextStepText(TooltipMakerAPI info, Color tc, float pad) {
         Color h = Misc.getHighlightColor();
+
+        //This is about how far I have the quest working reliably
         if (currentStage == Stage.REACH_SYSTEM) {
             info.addPara("Reach the " +
                     system.getNameWithLowercaseTypeShort(), tc, pad);
@@ -299,6 +330,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) 
     {
+        //This is about how far I have the quest working reliably
         if (currentStage == Stage.REACH_SYSTEM) 
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.CONTACT_COMMANDERS) 

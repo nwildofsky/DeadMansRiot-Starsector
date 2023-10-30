@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
-
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
@@ -24,6 +23,7 @@ import com.fs.starfarer.api.impl.campaign.procgen.NebulaEditor;
 import com.fs.starfarer.api.impl.campaign.procgen.PlanetConditionGenerator;
 import com.fs.starfarer.api.impl.campaign.procgen.StarAge;
 import com.fs.starfarer.api.impl.campaign.procgen.StarSystemGenerator;
+import com.fs.starfarer.api.impl.campaign.procgen.SalvageEntityGenDataSpec.DropData;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.BaseThemeGenerator;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.SalvageSpecialAssigner.ShipRecoverySpecialCreator;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.ShipRecoverySpecial.PerShipData;
@@ -40,7 +40,7 @@ import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 public class LazarusSystem
 {
-    //setup all distances here
+    // Setup all distances here
     final float asteroidBelt1Dist = 5300f;
     final float asteroidBelt2Dist = 15700f;
     final float innerRingDist = 2200f;
@@ -56,14 +56,14 @@ public class LazarusSystem
 
     //final float majorisRad = 670f;
 
-    static SectorEntityToken fleetCombatLoc1;
-    static SectorEntityToken fleetCombatLoc2;
+    static CustomCampaignEntityAPI fleetCombatLoc1;
+    static CustomCampaignEntityAPI fleetCombatLoc2;
 
-    public static SectorEntityToken GetCombatLoc1()
+    public static CustomCampaignEntityAPI GetCombatLoc1()
     {
         return fleetCombatLoc1;
     }
-    public static SectorEntityToken GetCombatLoc2()
+    public static CustomCampaignEntityAPI GetCombatLoc2()
     {
         return fleetCombatLoc2;
     }
@@ -85,6 +85,8 @@ public class LazarusSystem
 
 
         //#region Planets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Planet
+        // The planet location is placed randomly
         float planetAngle = 360f * (float)Math.random();
         PlanetAPI yurei = system.addPlanet("yurei",          // id
                                             erythemaStar,    // focus
@@ -98,12 +100,12 @@ public class LazarusSystem
         yurei.getSpec().setGlowColor(new Color(255,255,255,255));
         yurei.getSpec().setUseReverseLightForGlow(true);
         yurei.applySpecChanges();
-        yurei.setCustomDescriptionId("lazarus_erythema_yurei");
+        yurei.setCustomDescriptionId("planet_yurei");
 
         // Orbiting Space Station
-        SectorEntityToken yureiStation = system.addCustomEntity("yurei_station", "Yurei Station", "station_hightech3", "tritachyon");
-        yureiStation.setCircularOrbitPointingDown(yurei, 0, stationDist, 30f);
-        yureiStation.setCustomDescriptionId("lazarus_yurei_station");
+        SectorEntityToken abattoirStation = system.addCustomEntity("abattoir_station", "Abattoir Station", "station_hightech3", "tritachyon");
+        abattoirStation.setCircularOrbitPointingDown(yurei, 0, stationDist, 30f);
+        abattoirStation.setCustomDescriptionId("abattoir_station");
 
         // Market
         MarketAPI yureiMarket = Global.getFactory().createMarket("yurei_market", yurei.getName(), 4);
@@ -111,47 +113,51 @@ public class LazarusSystem
 		
 		yureiMarket.setSurveyLevel(SurveyLevel.NONE);
 		yureiMarket.setPrimaryEntity(yurei);
-		yureiMarket.getConnectedEntities().add(yureiStation);
+		yureiMarket.getConnectedEntities().add(abattoirStation);
 		
-        yureiMarket.addCondition(Conditions.AI_CORE_ADMIN);
+        //yureiMarket.addCondition(Conditions.AI_CORE_ADMIN);
         yureiMarket.addCondition(Conditions.ROGUE_AI_CORE);
 		yureiMarket.addCondition(Conditions.POPULATION_4);
-        yureiMarket.addCondition(Conditions.DESERT);
 		yureiMarket.addCondition(Conditions.HOT);
 		yureiMarket.addCondition(Conditions.HABITABLE);
-        yureiMarket.addCondition(Conditions.ORE_ABUNDANT);
+        yureiMarket.addCondition(Conditions.DECIVILIZED_SUBPOP);
 		
 		yureiMarket.addIndustry(Industries.POPULATION);
 		yureiMarket.addIndustry(Industries.SPACEPORT);
 		yureiMarket.addIndustry(Industries.ORBITALSTATION);
         yureiMarket.addIndustry(Industries.MILITARYBASE);
-        yureiMarket.addIndustry(Industries.MINING);
         yureiMarket.addIndustry(Industries.GROUNDDEFENSES);
         yureiMarket.addIndustry(Industries.HEAVYBATTERIES);
 
-        //yureiMarket.getCondition(Conditions.AI_CORE_ADMIN).getPlugin().apply("alpha_core");
-        yureiMarket.getIndustry(Industries.MILITARYBASE).setAICoreId("alpha_core");
-        // PersonAPI admin = yureiMarket.getAdmin();
-        // admin.setAICoreId("alpha_core");
-        // admin.getName().setFirst("Theta");
-        // admin.getName().setLast("AI Core");
-        // admin.setPortraitSprite("portrait_ai2");
-        // admin.setPersonality("reckless");
-        // yureiMarket.setAdmin(admin);
-
-		yureiMarket.addSubmarket(Submarkets.SUBMARKET_OPEN);
+		//yureiMarket.addSubmarket(Submarkets.SUBMARKET_OPEN);
 		yureiMarket.addSubmarket(Submarkets.SUBMARKET_BLACK);
 		yureiMarket.getTariff().modifyFlat("default_tariff", yureiMarket.getFaction().getTariffFraction());
-		
 		yureiMarket.setUseStockpilesForShortages(true);
 
-        yureiStation.setMarket(yureiMarket);
+        // Set the raid target on a specific industry
+        yureiMarket.getIndustry(Industries.MILITARYBASE).setAICoreId("beta_core");
+
+        // Add the rogue AI as the planet admin and add it into the comm directory
+        PersonAPI admin = Global.getFactory().createPerson();
+        admin.setId("theta_ai_admin");
+        admin.setName(new FullName("Theta", "AI Core", FullName.Gender.ANY));
+        admin.setPortraitSprite("graphics/portraits/portrait_ai2.png");
+        admin.setPersonality("reckless");
+        admin.setPostId(Ranks.POST_ADMINISTRATOR);
+        admin.setRankId(Ranks.TERRORIST);
+        yureiMarket.getCommDirectory().addPerson(admin, 0);
+        //yureiMarket.addPerson(admin);
+        //yureiMarket.setAdmin(admin);
+
+        abattoirStation.setMarket(yureiMarket);
 		yurei.setMarket(yureiMarket);
         Global.getSector().getEconomy().addMarket(yureiMarket, true);
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
         //#region Asteroid Belts ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Asteroid belt is what actually creates the game object
+        // Ring bands are extra visual elements pulled from graphics/planets
         system.addAsteroidBelt(erythemaStar,            // Focus
                                 1000,                  // numAsteroids
                                 asteroidBelt1Dist,     // orbitRadius
@@ -191,6 +197,8 @@ public class LazarusSystem
 
 
         //#region Jump Points ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Place the jump point 150 degrees away from the planet
+        // Randomly pick a direction for this angle
         int randSign = Math.random() > 0.5 ? 1 : -1;
         float jumpPointAngle = (planetAngle + 150 * randSign) % 360f;
         JumpPointAPI jumpPoint = Global.getFactory().createJumpPoint("lazarus_jump", "Lazarus System Jump");
@@ -250,9 +258,31 @@ public class LazarusSystem
 		debrisBNextToStar.setId("lazarus_debrisBNextToStar");
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        //#region Fleets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        float fleetCombatAngle = planetAngle + ((90f * (float)Math.random() + 30f) * randSign) % 360f;
 
+        //#region Berserk Weapon Salvage ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        debrisParams = new DebrisFieldParams(
+            100f,      // field radius - should not go above 1000 for performance reasons
+            -1f,       // density, visual - affects number of debris pieces
+            10000000f, // duration in days 
+            10000000f);// days the field will keep generating glowing pieces
+		debrisParams.source = DebrisFieldSource.BATTLE;
+		debrisParams.baseSalvageXP = 500; // base XP for scavenging in field
+		SectorEntityToken weaponDebris = Misc.addDebrisField(system, debrisParams, StarSystemGenerator.random);
+		weaponDebris.setSensorProfile(null);
+		weaponDebris.setDiscoverable(true);
+		weaponDebris.setCircularOrbitPointingDown(yurei, 360 * (float)Math.random(), stationDist - 100f, 15f);
+		weaponDebris.setId("berserk_debris");
+
+        // Add the weapon into the cargo by getting a random item from the berserk_weapons drop group
+        weaponDebris.getCargo().addItems(CargoItemType.WEAPONS, "berserkcanon", 1);
+        //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        //#region Fleets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Locations are between the planet and the jump point
+        float fleetCombatAngle = planetAngle + ((70f * (float)Math.random() + 45f) * randSign) % 360f;
+
+        // Locations to be used for fleet generation and placement
+        // Removed so that the icons don't appear on the map
         fleetCombatLoc1 = system.addCustomEntity("fleet_combat_loc", null, "mission_location", null);
 		fleetCombatLoc1.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist - 50, 310f);
         system.removeEntity(fleetCombatLoc1);

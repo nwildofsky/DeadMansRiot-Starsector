@@ -104,11 +104,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         tritachyonFleet.getFleetData().setSyncNeeded();
         tritachyonFleet.getFleetData().syncIfNeeded();
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
-        tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
         tritachyonFleet.setTransponderOn(true);
 
         system.addEntity(tritachyonFleet);
+        //LazarusSystem.GetCombatLoc1().setFleetForVisual(tritachyonFleet);
 
         luddicpathFleet = Global.getFactory().createEmptyFleet(Factions.LUDDIC_PATH, "Lazarus Luddic Path Fleet", true);
         CampaignUtils.addShipToFleet("venture_pather_Attack", FleetMemberType.SHIP, luddicpathFleet);
@@ -132,11 +133,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         luddicpathFleet.getFleetData().setSyncNeeded();
         luddicpathFleet.getFleetData().syncIfNeeded();
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
-        luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
         luddicpathFleet.setTransponderOn(true);
 
         system.addEntity(luddicpathFleet);
+        //LazarusSystem.GetCombatLoc2().setFleetForVisual(luddicpathFleet);
 
         // set a global reference we can use, useful for once-off missions.
         if (!setGlobalReference("$riot_ref")) return false;

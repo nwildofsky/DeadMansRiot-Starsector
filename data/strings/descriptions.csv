@@ -1,2 +1,5 @@
 id,type,text1,text2,text3,text4,notes
 berserkcanon,WEAPON,Test modded Dead Man's Riot Weapon that shoots berserk-inducing missiles.,,,,
+,,,,,,
+planet_yurei,CUSTOM,"Tri-Tachyon took advantage of Yurei’s remote location and barren landscape to create a planet-wide laboratory for covert experiments. Inhabitants are Tri-Tachyon scientists, sworn to secrecy, only able to leave with the occasional supply ship. With no natural resources and minimal methods of escape, Yurei relies on imported goods to maintain any form of life.",,,,
+abattoir_station,CUSTOM,"A space station embedded in a debris field orbiting Yurei. Officially, it monitors atmospheric conditions and extraterrestrial activity to provide an early warning system for the planet. According to employee rumors, it actually houses off-the-books experiments designated too dangerous even for Yurei’s hostile environment.",,,,

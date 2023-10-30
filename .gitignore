@@ -1,5 +1,5 @@
-/JavaWorkspace/**/bin
-/JavaWorkspace/*.jar
+JavaWorkspace/**/bin
+JavaWorkspace/*.jar
 
 # BlueJ files
 *.ctxt

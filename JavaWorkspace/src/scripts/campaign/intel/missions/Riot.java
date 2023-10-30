@@ -2,11 +2,19 @@ package scripts.campaign.intel.missions;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
+import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.characters.PersonAPI;
+import com.fs.starfarer.api.combat.BattleCreationContext;
+import com.fs.starfarer.api.combat.EngagementResultAPI;
+import com.fs.starfarer.api.fleet.FleetAPI;
+import com.fs.starfarer.api.fleet.FleetGoal;
 import com.fs.starfarer.api.fleet.FleetMemberType;
+import com.fs.starfarer.api.impl.campaign.FleetEncounterContext;
+import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.*;
@@ -24,7 +32,7 @@ import java.util.Map;
 import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 
-public class Riot extends HubMissionWithBarEvent implements FleetEventListener 
+public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 {
 
     // mission stages
@@ -44,6 +52,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     // important objects, systems and people
     protected CampaignFleetAPI tritachyonFleet;
     protected CampaignFleetAPI luddicpathFleet;
+    protected boolean pleasework;
     protected CampaignFleetAPI winningFleet;
     protected PersonAPI tritachyonCommander;
     protected PersonAPI luddicpathCommander;
@@ -187,7 +196,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_REP_IMPACT, true);
-            StartBattle();
+            StartBattle(luddicpathFleet, tritachyonFleet, dialog);
             
             return true;
         }
@@ -197,28 +206,45 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_REP_IMPACT, true);
-            StartBattle();
+            StartBattle(tritachyonFleet, luddicpathFleet, dialog);
             return true;
         }
         return false;
     }
-    public void StartBattle()
+    //Main problem area(?) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    public void StartBattle(CampaignFleetAPI targetFleet, CampaignFleetAPI helpingFleet, InteractionDialogAPI dialog)
     {
+        //BattleCreationContext dogfight = new BattleCreationContext(Global.getSector().getPlayerFleet(), FleetGoal.ATTACK, targetFleet, FleetGoal.ATTACK);
+
         luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
-        luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
+        //luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
-        luddicpathFleet.removeFirstAssignment();
-        luddicpathFleet.addAssignment(FleetAssignment.INTERCEPT, tritachyonFleet, 9999999);
-        luddicpathFleet.setInteractionTarget(tritachyonFleet);
+        
         tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
-        tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
+        //tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
-        tritachyonFleet.removeFirstAssignment();
-        tritachyonFleet.addAssignment(FleetAssignment.INTERCEPT, luddicpathFleet, 9999999);
-        tritachyonFleet.setInteractionTarget(luddicpathFleet);
+        
+        Global.getFactory().createBattle(helpingFleet, targetFleet);
+
+
+        //An attempt was made here ;-;
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        //FleetInteractionDialogPluginImpl testPlugin = (FleetInteractionDialogPluginImpl)dialog.getPlugin();
+
+        //FleetEncounterContext encounterContext = (FleetEncounterContext)testPlugin.getContext();
+        //
+        //encounterContext.setBattle(dialog.startBattle(dogfight));
+        
+        //BattleAPI firstCombat = Global.getSector().getPlayerFleet().getBattle(); //Gets the battle the player is in
+
+        //firstCombat.join(helpingFleet);
+        //
+        //helpingFleet.getBattle().uncombine();
+        //helpingFleet.getBattle().genCombined();
 
 
     }
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // during the initial dialogue and in any dialogue where we use "Call $riot_ref updateData", these values will be put in memory
     // here, used so we can, say, type $riot_personName and automatically insert the quest giver's name
@@ -345,4 +371,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     public String getBaseName() {
         return "Dead Man's Riot";
     }
+
+    
 }

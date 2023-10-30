@@ -274,7 +274,7 @@ public class LazarusSystem
 		weaponDebris.setId("berserk_debris");
 
         // Add the weapon into the cargo by getting a random item from the berserk_weapons drop group
-        weaponDebris.getCargo().addItems(CargoItemType.WEAPONS, "berserkcanon", 1);
+        //weaponDebris.getCargo().addItems(CargoItemType.WEAPONS, "berserkcanon", 1);
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         //#region Fleets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

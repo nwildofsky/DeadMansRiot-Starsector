@@ -24,6 +24,6 @@
 				"blowbackLength":18.0,
 				"blowbackSpread":10.0,
     			"particleColor":[12, 112, 44, 120]},
-  "projectileSpecId": "heatseeker_mrm",
+  "projectileSpecId": "berserker_mrm",
   "fireSoundTwo": "salamander_fire"
 }

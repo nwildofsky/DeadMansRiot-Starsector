@@ -22,6 +22,7 @@ public class DeadMansRiotModPlugin extends BaseModPlugin
         // Add initialization scripts
         blank b = new blank();
         b.TestIntegration();
+        
     }
 
     @Override

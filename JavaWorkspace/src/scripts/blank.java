@@ -10,7 +10,7 @@ import com.fs.starfarer.api.mission.FleetSide;
 import org.lazywizard.lazylib.combat.AIUtils;
 
 
-import org.lazywizard.console.BaseCommand;
+import org.lazywizard.console.*;
 import org.lazywizard.console.CommonStrings;
 import org.lazywizard.console.Console;
 
@@ -76,17 +76,23 @@ public class blank implements BaseCommand {
     public static void berserkStart(){
         final CombatEngineAPI engine = Global.getCombatEngine();
         final ShipAPI target = engine.getPlayerShip().getShipTarget();
-        boolean Enraged = false;
+        boolean Enraged = true;
         turnTraitor(target);
 
-        while(Enraged){
-           AIUtils.getNearestEnemy(target);
+        if(Enraged){
+           checkTargets(target);
+
+
 
         }
         
         
     }
     
+    public static ShipAPI checkTargets(ShipAPI target){
+        return AIUtils.getNearestEnemy(target);
+    }
+
     @Override
     public CommandResult runCommand(String args, CommandContext context)
     {

@@ -130,8 +130,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
     public void accept(InteractionDialogAPI dialog, java.util.Map<java.lang.String, MemoryAPI> memoryMap)
     {
+        super.accept(dialog, memoryMap);
         Global.getLogger(this.getClass()).info("Riot class accept function called!");
-
         if (!createdFleets)
         {
             tritachyonFleet = Global.getFactory().createEmptyFleet(Factions.TRITACHYON, "Lazarus Tri-Tachyon Fleet", true);

@@ -1,6 +1,7 @@
 package scripts.campaign.intel.missions;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.Script;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -15,14 +16,18 @@ import com.fs.starfarer.api.fleet.FleetGoal;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.FleetEncounterContext;
 import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl;
+import com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.FIDConfigGen;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.*;
 import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
+import com.fs.starfarer.api.impl.campaign.procgen.themes.RemnantSeededFleetManager.RemnantFleetInteractionConfigGen;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+
+import scripts.campaign.IsolatedBattleFleetInteractionConfigGen;
 import scripts.world.systems.LazarusSystem;
 
 import java.awt.*;
@@ -52,7 +57,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     // important objects, systems and people
     protected CampaignFleetAPI tritachyonFleet;
     protected CampaignFleetAPI luddicpathFleet;
-    protected boolean pleasework;
     protected CampaignFleetAPI winningFleet;
     protected PersonAPI tritachyonCommander;
     protected PersonAPI luddicpathCommander;
@@ -67,6 +71,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     // run when the bar event starts / when we ask a contact about the mission
     protected boolean create(MarketAPI createdAt, boolean barEvent) 
     {
+        Global.getLogger(this.getClass()).info("Riot class create function called!");
 
         setGiverRank(Ranks.AGENT);
         setGiverPost(Ranks.POST_EXECUTIVE); //DOES THIS POST MAKE SENSE? - Dominic
@@ -84,7 +89,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         if (!setPersonMissionRef(person, "$riot_ref")) {
             return false;
         }
-
 
         setGiverIsPotentialContactOnSuccess(1f);
 
@@ -104,6 +108,29 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         system = pickSystem(true);
         if (system == null) return false;
 
+        // set a global reference we can use, useful for once-off missions.
+        if (!setGlobalReference("$riot_ref")) return false;
+
+        // set our starting, success and failure stages
+        setStartingStage(Stage.REACH_SYSTEM);
+        setStageOnEnteredLocation(Stage.CONTACT_COMMANDERS, system);
+        setSuccessStage(Stage.COMPLETED);
+        setFailureStage(Stage.FAILED);
+
+        // set stage transitions when certain global flags are set, and when certain flags are set on the questgiver
+        setStageOnGlobalFlag(Stage.JOIN_BATTLE, "$riot_allySelected");
+        setStageOnMemoryFlag(Stage.AFTER_ACTION_REPORT, person, "$riot_afteraction");
+        setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
+        setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
+        // set time limit and credit reward
+        setCreditReward(CreditReward.HIGH);
+
+        return true;
+    }
+
+    public void accept(InteractionDialogAPI dialog, java.util.Map<java.lang.String, MemoryAPI> memoryMap)
+    {
+        Global.getLogger(this.getClass()).info("Riot class accept function called!");
 
         if (!createdFleets)
         {
@@ -172,24 +199,16 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             createdFleets = true;
         }
 
-        // set a global reference we can use, useful for once-off missions.
-        if (!setGlobalReference("$riot_ref")) return false;
+        beginStageTrigger(Stage.CONTACT_COMMANDERS);
+        this.triggerRunScriptAfterDelay(0f, new Script() {
+            @Override
+            public void run()
+            {
+                Global.getLogger(this.getClass()).info("Lazarus System reached, trigger encountered!");
+            }
+        });
+        endTrigger();
 
-        // set our starting, success and failure stages
-        setStartingStage(Stage.REACH_SYSTEM);
-        setStageOnEnteredLocation(Stage.CONTACT_COMMANDERS, system);
-        setSuccessStage(Stage.COMPLETED);
-        setFailureStage(Stage.FAILED);
-
-        // set stage transitions when certain global flags are set, and when certain flags are set on the questgiver
-        setStageOnGlobalFlag(Stage.JOIN_BATTLE, "$riot_allySelected");
-        setStageOnMemoryFlag(Stage.AFTER_ACTION_REPORT, person, "$riot_afteraction");
-        setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
-        setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
-        // set time limit and credit reward
-        setCreditReward(CreditReward.HIGH);
-
-        return true;
     }
 
     @Override
@@ -224,10 +243,14 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
         //luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
+        luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
+            new IsolatedBattleFleetInteractionConfigGen());
         
         tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
         //tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
+        tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
+            new IsolatedBattleFleetInteractionConfigGen());
         
         Global.getFactory().createBattle(helpingFleet, targetFleet);
 

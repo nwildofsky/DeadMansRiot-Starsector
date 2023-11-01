@@ -61,6 +61,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     protected PersonAPI tritachyonCommander;
     protected PersonAPI luddicpathCommander;
     protected StarSystemAPI system;
+    protected MarketAPI initialMarket;
 
     // Mission only spawns in Tri-Tach bars
     public boolean shouldShowAtMarket(MarketAPI market) {
@@ -80,6 +81,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         
 
         PersonAPI person = getPerson();
+        initialMarket = createdAt;
         if (person == null) return false;
 
         // setting the mission ref allows us to use the Call rulecommand in their dialogues, so that we can make this script do things
@@ -435,7 +437,16 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         } else if (currentStage == Stage.JOIN_BATTLE) {
             info.addPara("Join the battle in the " +
                     system.getNameWithLowercaseTypeShort() + ".", opad);
+        } else if (currentStage == Stage.AFTER_ACTION_REPORT) {
+            info.addPara("Talk to the commander of the fleet you aided .", opad);
+        } else if (currentStage == Stage.RAID_PLANET) {
+            info.addPara("Raid Yurei for the AI", opad);
+        } else if (currentStage == Stage.DEFEND_SELF) {
+            info.addPara("Report back to the fleet commander with the AI.", opad);
+        } else if (currentStage == Stage.CONTACT_GIVER) {
+            info.addPara("Go back to " + getPerson().getNameString() + ".", opad);
         }
+        
     }
 
     // short description in popups and the intel entry
@@ -456,6 +467,18 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             info.addPara("Join the battle in the " +
                     system.getNameWithLowercaseTypeShort()  + " with the fleet you promised to aid.", tc, pad);
             return true;
+        } else if (currentStage == Stage.AFTER_ACTION_REPORT) {
+            info.addPara("Talk to the fleet commander of the faction you have aided.", tc, pad);
+            return true;
+        } else if (currentStage == Stage.RAID_PLANET) {
+            info.addPara("Raid the planet Yurei for the AI core.", tc, pad);
+            return true;
+        } else if (currentStage == Stage.DEFEND_SELF) {
+            info.addPara("Return to the fleet that you aided with the AI core.", tc, pad);
+            return true;
+        } else if (currentStage == Stage.CONTACT_GIVER) {
+            info.addPara("Return to the bar that you accepted the mission in.", tc, pad);
+            return true;
         }
         return false;
     }
@@ -471,6 +494,14 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.JOIN_BATTLE) 
             return getMapLocationFor(system.getCenter());
+        else if (currentStage == Stage.AFTER_ACTION_REPORT) 
+            return getMapLocationFor(system.getCenter());
+        else if (currentStage == Stage.RAID_PLANET) 
+            return getMapLocationFor(system.getEntityById("planet_yurei"));
+        else if (currentStage == Stage.DEFEND_SELF) 
+            return getMapLocationFor(system.getCenter());
+        else if (currentStage == Stage.CONTACT_GIVER) 
+            return getMapLocationFor(initialMarket.getPrimaryEntity());
         return null;
     }
 

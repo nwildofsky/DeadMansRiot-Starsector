@@ -338,6 +338,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         
         dialog.dismissAsCancel();
         Global.getSector().getPlayerFleet().getBattle().leave(Global.getSector().getPlayerFleet(), false);
+        helpingFleet.getBattle().leave(helpingFleet, false);
         Global.getFactory().createBattle(helpingFleet, targetFleet);
         
 

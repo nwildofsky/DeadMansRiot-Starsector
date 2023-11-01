@@ -16,7 +16,7 @@ AdjustRepActivePerson COOPERATIVE 75
 AdjustRep $faction.id FRIENDLY 75
 Call $global.riot_ref updateStage","""Finally, a reasonable individual. If we rout them quickly enough, perhaps we can remain on schedule.""",cutCommLink:Cut the comm link,
 ,,,,,,
-riot_luddicpathFleetOpen,OpenCommLink,$entity.riot_luddicpathfleet score:100,$LP_titheAskedFor = false,"A warzone greets you at the coordinates $riot_personName gave you. Primitive Luddic ships are ready to engage in a pitched battle with a top-of-the-line Tri-Tachyon fleet.","riot_luddicpathFleetHelp:Continue comm link
+riot_luddicpathFleetOpen,OpenCommLink,$entity.riot_luddicpathfleet score:200,,"A warzone greets you at the coordinates $riot_personName gave you. Primitive Luddic ships are ready to engage in a pitched battle with a top-of-the-line Tri-Tachyon fleet.","riot_luddicpathFleetHelp:Continue comm link
 cutCommLink:Cut the comm link",
 riot_luddicpathFleetHelp,DialogOptionSelected,$option == riot_luddicpathFleetHelp,,"""Well met, Captain! I am $riot_luddicpathCommName, of the Luddic Path. The heretics you see before you are attempting to retrieve a vile artifact of great power, no doubt to spread their sacrilege to the stars! Join us, and we shall lay waste to their diabolical plot!""", "riot_luddicpathAid:Aid
 cutCommLink:Refuse"

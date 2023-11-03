@@ -464,6 +464,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             info.addPara("Talk to the commander of the fleet you aided .", opad);
         } else if (currentStage == Stage.RAID_PLANET) {
             info.addPara("Raid Yurei for the AI", opad);
+        } else if (currentStage == Stage.GRAB_CORE) {
+            info.addPara("Grab the AI core in the debris field", opad);
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Report back to the fleet commander with the AI.", opad);
         } else if (currentStage == Stage.CONTACT_GIVER) {
@@ -496,6 +498,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         } else if (currentStage == Stage.RAID_PLANET) {
             info.addPara("Raid the planet Yurei for the AI core.", tc, pad);
             return true;
+        } else if (currentStage == Stage.GRAB_CORE) {
+            info.addPara("Grab the Rogue AI Core in the debris field.", tc, pad);
+            return true;
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Return to the fleet that you aided with the AI core.", tc, pad);
             return true;
@@ -521,6 +526,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.RAID_PLANET) 
             return getMapLocationFor(system.getEntityById("planet_yurei"));
+        else if (currentStage == Stage.GRAB_CORE) 
+            return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.DEFEND_SELF) 
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.CONTACT_GIVER) 

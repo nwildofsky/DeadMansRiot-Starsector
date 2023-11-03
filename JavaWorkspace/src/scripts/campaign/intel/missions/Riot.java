@@ -48,6 +48,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         JOIN_BATTLE,
         AFTER_ACTION_REPORT,
         RAID_PLANET,
+        GRAB_CORE,
         DEFEND_SELF,
         CONTACT_GIVER,
         COMPLETED,
@@ -119,6 +120,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         // set stage transitions when certain global flags are set, and when certain flags are set on the questgiver
         setStageOnMemoryFlag(Stage.JOIN_BATTLE, person, "$riot_allySelected");
         setStageOnMemoryFlag(Stage.AFTER_ACTION_REPORT, person, "$riot_afteraction");
+        setStageOnMemoryFlag(Stage.RAID_PLANET, person, "$riot_raidplanet");
+        setStageOnMemoryFlag(Stage.DEFEND_SELF, person, "$riot_defendself");
         setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
         setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
         // set time limit and credit reward
@@ -177,6 +180,17 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Raid planet new objective, trigger encountered!");
+            }
+        });
+        endTrigger();
+
+        // Transition goal from AFTER_ACTION_REPORT to RAID_PLANET
+        beginStageTrigger(Stage.GRAB_CORE);
+        triggerRunScriptAfterDelay(0f, new Script() {
+            @Override
+            public void run()
+            {
+                Global.getLogger(this.getClass()).info("Planet has been raided, trigger encountered!");
             }
         });
         endTrigger();
@@ -314,6 +328,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             StartBattle(tritachyonFleet, luddicpathFleet, dialog);
             return true;
         }
+        //This will start after the dialog with the winning fleet after battle 1. You can add other things here if needed!
+        if (action.equals("startRaid"))
+        {
+            getPerson().getMemoryWithoutUpdate().set("$riot_raidplanet", true);
+            return true;
+        }
         return false;
     }
 
@@ -393,7 +413,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         {
             winningFleet = tritachyonFleet;
             getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
-            tritachyonFleet.getMemoryWithoutUpdate().set("$riot_survived", true);
+            tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachpostbattle", true);
+            tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_tritachfleet");
             Global.getLogger(this.getClass()).info("Tritachyon fleet wins!");
             //tritachyonFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc1(), 1000000f);
         }
@@ -401,7 +422,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         {
             winningFleet = luddicpathFleet;
             getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
-            luddicpathFleet.getMemoryWithoutUpdate().set("$riot_survived", true);
+            luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathpostbattle", true);
+            luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_luddicpathfleet");
             Global.getLogger(this.getClass()).info("Luddic Path fleet wins!");
             //luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
         }

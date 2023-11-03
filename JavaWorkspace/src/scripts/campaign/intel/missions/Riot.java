@@ -4,7 +4,9 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.Script;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
@@ -23,6 +25,7 @@ import com.fs.starfarer.api.impl.campaign.ids.*;
 import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.RemnantSeededFleetManager.RemnantFleetInteractionConfigGen;
+import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.TempData;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -37,7 +40,7 @@ import java.util.Map;
 import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 
-public class Riot extends HubMissionWithBarEvent implements FleetEventListener
+public class Riot extends HubMissionWithBarEvent implements FleetEventListener, ColonyPlayerHostileActListener
 {
 
     // mission stages
@@ -445,6 +448,31 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         }
     }
 
+    @Override
+    public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2,
+            CargoAPI arg3) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reportRaidForValuablesFinishedBeforeCargoShown'");
+    }
+
+    @Override
+    public void reportRaidToDisruptFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2, Industry arg3) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reportRaidToDisruptFinished'");
+    }
+
+    @Override
+    public void reportSaturationBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reportSaturationBombardmentFinished'");
+    }
+
+    @Override
+    public void reportTacticalBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reportTacticalBombardmentFinished'");
+    }
+
     // description when selected in intel screen
     @Override
     public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
@@ -540,6 +568,4 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     public String getBaseName() {
         return "Dead Man's Riot";
     }
-
-    
 }

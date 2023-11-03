@@ -124,6 +124,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         setStageOnMemoryFlag(Stage.JOIN_BATTLE, person, "$riot_allySelected");
         setStageOnMemoryFlag(Stage.AFTER_ACTION_REPORT, person, "$riot_afteraction");
         setStageOnMemoryFlag(Stage.RAID_PLANET, person, "$riot_raidplanet");
+        setStageOnMemoryFlag(Stage.GRAB_CORE, person, "$riot_grabcore");
         setStageOnMemoryFlag(Stage.DEFEND_SELF, person, "$riot_defendself");
         setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
         setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
@@ -183,6 +184,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Raid planet new objective, trigger encountered!");
+                Global.getSector().getListenerManager().addListener(base);
             }
         });
         endTrigger();
@@ -194,6 +196,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Planet has been raided, trigger encountered!");
+                Global.getSector().getListenerManager().removeListener(base);
             }
         });
         endTrigger();
@@ -449,14 +452,19 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     }
 
     @Override
-    public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2,
-            CargoAPI arg3) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'reportRaidForValuablesFinishedBeforeCargoShown'");
+    public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, CargoAPI cargo) 
+    {
+        if(market.getId().equals("yurei_market"))
+        {
+            if(currentStage == Stage.RAID_PLANET)
+            {
+                getPerson().getMemoryWithoutUpdate().set("$riot_grabcore", true);
+            }
+        }
     }
 
     @Override
-    public void reportRaidToDisruptFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2, Industry arg3) {
+    public void reportRaidToDisruptFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, Industry cargo) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'reportRaidToDisruptFinished'");
     }
@@ -553,7 +561,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         else if (currentStage == Stage.AFTER_ACTION_REPORT) 
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.RAID_PLANET) 
-            return getMapLocationFor(system.getEntityById("planet_yurei"));
+            return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.GRAB_CORE) 
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.DEFEND_SELF) 

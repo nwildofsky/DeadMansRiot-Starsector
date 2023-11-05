@@ -4,7 +4,9 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.Script;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
+import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
@@ -23,6 +25,7 @@ import com.fs.starfarer.api.impl.campaign.ids.*;
 import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.RemnantSeededFleetManager.RemnantFleetInteractionConfigGen;
+import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.TempData;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -37,7 +40,7 @@ import java.util.Map;
 import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 
-public class Riot extends HubMissionWithBarEvent implements FleetEventListener
+public class Riot extends HubMissionWithBarEvent implements FleetEventListener, ColonyPlayerHostileActListener
 {
 
     // mission stages
@@ -48,6 +51,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         JOIN_BATTLE,
         AFTER_ACTION_REPORT,
         RAID_PLANET,
+        GRAB_CORE,
         DEFEND_SELF,
         CONTACT_GIVER,
         COMPLETED,
@@ -119,6 +123,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         // set stage transitions when certain global flags are set, and when certain flags are set on the questgiver
         setStageOnMemoryFlag(Stage.JOIN_BATTLE, person, "$riot_allySelected");
         setStageOnMemoryFlag(Stage.AFTER_ACTION_REPORT, person, "$riot_afteraction");
+        setStageOnMemoryFlag(Stage.RAID_PLANET, person, "$riot_raidplanet");
+        setStageOnMemoryFlag(Stage.GRAB_CORE, person, "$riot_grabcore");
+        setStageOnMemoryFlag(Stage.DEFEND_SELF, person, "$riot_defendself");
         setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
         setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
         // set time limit and credit reward
@@ -143,6 +150,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Lazarus System reached, trigger encountered!");
+                LazarusSystem.addMarketAIAdmin();
             }
         });
         endTrigger();
@@ -177,11 +185,33 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Raid planet new objective, trigger encountered!");
+                Global.getSector().getListenerManager().addListener(base);
             }
         });
         endTrigger();
 
-        // Transition goal from RAID_PLANET to DEFEND_SELF
+        // Transition goal from RAID_PLANET to GRAB_CORE
+        beginStageTrigger(Stage.GRAB_CORE);
+        triggerRunScriptAfterDelay(0f, new Script() {
+            @Override
+            public void run()
+            {
+                Global.getLogger(this.getClass()).info("Planet has been raided, trigger encountered!");
+                Global.getSector().getListenerManager().removeListener(base);
+                LazarusSystem.addBerserkDebris();
+            }
+        });
+        // triggerRunScriptAfterDelay(.2f, new Script() {
+        //     @Override
+        //     public void run()
+        //     {
+        //         Global.getLogger(this.getClass()).info("Berserk Weapon added to debris, delay trigger encountered!");
+        //         LazarusSystem.addModWeaponToDebris();
+        //     }
+        // });
+        endTrigger();
+
+        // Transition goal from GRAB_CORE to DEFEND_SELF
         beginStageTrigger(Stage.DEFEND_SELF);
         triggerRunScriptAfterDelay(0f, new Script() {
             @Override
@@ -314,6 +344,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             StartBattle(tritachyonFleet, luddicpathFleet, dialog);
             return true;
         }
+        //This will start after the dialog with the winning fleet after battle 1. You can add other things here if needed!
+        if (action.equals("startRaid"))
+        {
+            getPerson().getMemoryWithoutUpdate().set("$riot_raidplanet", true);
+            return true;
+        }
         return false;
     }
 
@@ -393,7 +429,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         {
             winningFleet = tritachyonFleet;
             getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
-            tritachyonFleet.getMemoryWithoutUpdate().set("$riot_survived", true);
+            tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachpostbattle", true);
+            tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_tritachfleet");
             Global.getLogger(this.getClass()).info("Tritachyon fleet wins!");
             //tritachyonFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc1(), 1000000f);
         }
@@ -401,7 +438,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         {
             winningFleet = luddicpathFleet;
             getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
-            luddicpathFleet.getMemoryWithoutUpdate().set("$riot_survived", true);
+            luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathpostbattle", true);
+            luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_luddicpathfleet");
             Global.getLogger(this.getClass()).info("Luddic Path fleet wins!");
             //luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
         }
@@ -409,18 +447,49 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
 
     // if the fleet despawns for whatever reason, fail the mission
     public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason, Object param) {
-        if (isDone() || result != null) return;
+        // This does not work as I thought it did and we're not currently using it anyway -Nathan
+        // if (isDone() || result != null) return;
 
-        Global.getLogger(this.getClass()).info("Fleet reported as despawned! Current fleet was "
-            + (Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet) ? "involved" : "not involved")
-            + " in a player battle when it despawned");
-        if (!Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet))
+        // Global.getLogger(this.getClass()).info("Fleet reported as despawned! Current fleet was "
+        //     + (Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet) ? "involved" : "not involved")
+        //     + " in a player battle when it despawned");
+        // if (!Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet))
+        // {
+        //     if (fleet.getMemoryWithoutUpdate().contains("$riot_tritachfleet") || fleet.getMemoryWithoutUpdate().contains("$riot_luddicpathfleet"))
+        //     {
+        //         getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
+        //     }
+        // }
+    }
+
+    @Override
+    public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, CargoAPI cargo) 
+    {
+        if(market.getId().equals("yurei_market"))
         {
-            if (fleet.getMemoryWithoutUpdate().contains("$riot_tritachfleet") || fleet.getMemoryWithoutUpdate().contains("$riot_luddicpathfleet"))
+            if(currentStage == Stage.RAID_PLANET)
             {
-                getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
+                getPerson().getMemoryWithoutUpdate().set("$riot_grabcore", true);
             }
         }
+    }
+
+    @Override
+    public void reportRaidToDisruptFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, Industry cargo) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reportRaidToDisruptFinished'");
+    }
+
+    @Override
+    public void reportSaturationBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reportSaturationBombardmentFinished'");
+    }
+
+    @Override
+    public void reportTacticalBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'reportTacticalBombardmentFinished'");
     }
 
     // description when selected in intel screen
@@ -442,6 +511,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
             info.addPara("Talk to the commander of the fleet you aided .", opad);
         } else if (currentStage == Stage.RAID_PLANET) {
             info.addPara("Raid Yurei for the AI", opad);
+        } else if (currentStage == Stage.GRAB_CORE) {
+            info.addPara("Grab the AI core in the debris field", opad);
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Report back to the fleet commander with the AI.", opad);
         } else if (currentStage == Stage.CONTACT_GIVER) {
@@ -474,6 +545,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         } else if (currentStage == Stage.RAID_PLANET) {
             info.addPara("Raid the planet Yurei for the AI core.", tc, pad);
             return true;
+        } else if (currentStage == Stage.GRAB_CORE) {
+            info.addPara("Grab the Rogue AI Core in the debris field.", tc, pad);
+            return true;
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Return to the fleet that you aided with the AI core.", tc, pad);
             return true;
@@ -498,7 +572,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
         else if (currentStage == Stage.AFTER_ACTION_REPORT) 
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.RAID_PLANET) 
-            return getMapLocationFor(system.getEntityById("planet_yurei"));
+            return getMapLocationFor(system.getCenter());
+        else if (currentStage == Stage.GRAB_CORE) 
+            return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.DEFEND_SELF) 
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.CONTACT_GIVER) 
@@ -511,6 +587,4 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener
     public String getBaseName() {
         return "Dead Man's Riot";
     }
-
-    
 }

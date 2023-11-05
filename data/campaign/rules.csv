@@ -26,3 +26,9 @@ AdjustRepActivePerson COOPERATIVE 75
 AdjustRep $faction.id FRIENDLY 75
 Call $global.riot_ref updateStage","""Aye, there's hope for this system yet! Show no mercy, for none shall be given to you!""",cutCommLink:Cut the comm link,
 ,,,,,,
+riot_tritachPostBattleOpen,OpenCommLink,$entity.riot_tritachpostbattle score:100,"Call $global.riot_ref updateData
+Call $global.riot_ref startRaid","""What drives those barbarians to disrupt our operations, I may never know. Regardless, you've done well in assisting us, Captain. The deal has changed. Since our ships have taken unscheduled damage, we will need to undergo maintenance. While this happens, you will retrieve an experimental AI core from a facility on Yurei. I advise you to take the necessary precautions; it's more valuable than your ship and everyone on it.""",cutCommLink:Cut the comm link,
+,,,,,,
+riot_luddicpathPostBattleOpen,OpenCommLink,$entity.riot_luddicpathpostbattle score:200,"Call $global.riot_ref updateData
+Call $global.riot_ref startRaid","""Never again will those heathens infect the stars with their sacrilege. Listen well, Captain. The bounty those heretics sought after is still on Yurei, a nearby planet. It's some kind of new devilish AI core, held within a fortified stronghold. Our fleet's taken heavy fire, we will need to hold this position for repairs. If you can retrieve that core from Yurei, you'll have done humanity a favor she may never repay you.""",cutCommLink:Cut the comm link,
+,,,,,,

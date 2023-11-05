@@ -150,6 +150,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Lazarus System reached, trigger encountered!");
+                LazarusSystem.addMarketAIAdmin();
             }
         });
         endTrigger();
@@ -189,7 +190,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         });
         endTrigger();
 
-        // Transition goal from AFTER_ACTION_REPORT to RAID_PLANET
+        // Transition goal from RAID_PLANET to GRAB_CORE
         beginStageTrigger(Stage.GRAB_CORE);
         triggerRunScriptAfterDelay(0f, new Script() {
             @Override
@@ -197,11 +198,20 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             {
                 Global.getLogger(this.getClass()).info("Planet has been raided, trigger encountered!");
                 Global.getSector().getListenerManager().removeListener(base);
+                LazarusSystem.addBerserkDebris();
             }
         });
+        // triggerRunScriptAfterDelay(.2f, new Script() {
+        //     @Override
+        //     public void run()
+        //     {
+        //         Global.getLogger(this.getClass()).info("Berserk Weapon added to debris, delay trigger encountered!");
+        //         LazarusSystem.addModWeaponToDebris();
+        //     }
+        // });
         endTrigger();
 
-        // Transition goal from RAID_PLANET to DEFEND_SELF
+        // Transition goal from GRAB_CORE to DEFEND_SELF
         beginStageTrigger(Stage.DEFEND_SELF);
         triggerRunScriptAfterDelay(0f, new Script() {
             @Override
@@ -437,18 +447,19 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
     // if the fleet despawns for whatever reason, fail the mission
     public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason, Object param) {
-        if (isDone() || result != null) return;
+        // This does not work as I thought it did and we're not currently using it anyway -Nathan
+        // if (isDone() || result != null) return;
 
-        Global.getLogger(this.getClass()).info("Fleet reported as despawned! Current fleet was "
-            + (Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet) ? "involved" : "not involved")
-            + " in a player battle when it despawned");
-        if (!Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet))
-        {
-            if (fleet.getMemoryWithoutUpdate().contains("$riot_tritachfleet") || fleet.getMemoryWithoutUpdate().contains("$riot_luddicpathfleet"))
-            {
-                getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
-            }
-        }
+        // Global.getLogger(this.getClass()).info("Fleet reported as despawned! Current fleet was "
+        //     + (Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet) ? "involved" : "not involved")
+        //     + " in a player battle when it despawned");
+        // if (!Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet))
+        // {
+        //     if (fleet.getMemoryWithoutUpdate().contains("$riot_tritachfleet") || fleet.getMemoryWithoutUpdate().contains("$riot_luddicpathfleet"))
+        //     {
+        //         getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
+        //     }
+        // }
     }
 
     @Override

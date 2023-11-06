@@ -1,77 +1,103 @@
+// Source code is decompiled from a .class file using FernFlower decompiler.
 package scripts.plugins;
-
-import com.fs.starfarer.api.combat.OnHitEffectPlugin;
-import com.fs.starfarer.api.combat.ShipAPI;
-
-import org.lwjgl.util.vector.Vector2f;
-
-import org.lazywizard.lazylib.combat.AIUtils;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.BaseCombatLayeredRenderingPlugin;
-import com.fs.starfarer.api.combat.CombatEngineAPI;
+import com.fs.starfarer.api.combat.CombatEngineLayers;
 import com.fs.starfarer.api.combat.CombatEntityAPI;
 import com.fs.starfarer.api.combat.DamagingProjectileAPI;
 import com.fs.starfarer.api.combat.FighterLaunchBayAPI;
-import com.fs.starfarer.api.combat.listeners.ApplyDamageResultAPI;
+import com.fs.starfarer.api.combat.ShipAPI;
+import com.fs.starfarer.api.combat.ViewportAPI;
+import com.fs.starfarer.api.util.FaderUtil;
 import com.fs.starfarer.api.util.IntervalUtil;
+import com.fs.starfarer.api.util.Misc;
+import java.util.EnumSet;
+import org.lazywizard.lazylib.combat.AIUtils;
+import org.lwjgl.opengl.GL14;
+import org.lwjgl.util.vector.Vector2f;
 
-public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin implements OnHitEffectPlugin {
+public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin {
+   private int maxTicks = 0;
+   protected DamagingProjectileAPI proj;
+   protected ShipAPI target;
+   protected Vector2f offset;
+   protected int ticks = 0;
+   protected IntervalUtil interval;
+   protected FaderUtil fader = new FaderUtil(1.0F, 0.5F, 0.5F);
+   protected EnumSet<CombatEngineLayers> layers;
+   protected boolean betrayed = false;
 
-    public void TestIntegration()
-    {
-        Global.getLogger(this.getClass()).info("Running blank through the ModPlugin, integration success!");
-    }
+   public BerserkTriggerEffect() {
+      this.layers = EnumSet.of(CombatEngineLayers.BELOW_INDICATORS_LAYER);
+   }
 
-    protected IntervalUtil interval;
-    protected float upTime = 0.0f;
+   public BerserkTriggerEffect(DamagingProjectileAPI proj, ShipAPI target, Vector2f offset, int alpha, float duration) {
+      this.layers = EnumSet.of(CombatEngineLayers.BELOW_INDICATORS_LAYER);
+      this.proj = proj;
+      this.target = target;
+      this.offset = offset;
+      this.maxTicks = (int)(duration * 2.0F);
+      this.interval = new IntervalUtil(0.4F, 0.6F);
+      this.interval.forceIntervalElapsed();
+   }
 
-    @Override
-    public void onHit(DamagingProjectileAPI proj, CombatEntityAPI target, Vector2f pos, boolean hitShield,
-            ApplyDamageResultAPI damageResult, CombatEngineAPI combatEngine) {
-        // Global.getLogger(this.getClass()).info("Berserk Trigger Effect called on
-        // hit");
+   public float getRenderRadius() {
+      return 500.0F;
+   }
 
-        if (!hitShield) {
-            if (target instanceof ShipAPI && upTime <= 10f) {
+   public EnumSet<CombatEngineLayers> getActiveLayers() {
+      return this.layers;
+   }
 
-                ShipAPI hitTarget = ((ShipAPI) target);
+   public void init(CombatEntityAPI entity) {
+      super.init(entity);
+   }
 
-                int hitTeam = hitTarget.getOwner();
+   public void advance(float amount) {
+        
+        //Get the shipapi reference
+        ShipAPI hitTarget = ((ShipAPI) target);
 
-                ShipAPI nearestShip = AIUtils.getNearestShip(target);
+        //Get a reference to the original owner of the ship
+        int hitTeam = hitTarget.getOwner();
 
+        //Find the nearest ship
+        ShipAPI nearestShip = AIUtils.getNearestShip(target);
+
+        //Clears the effect if the ticks surpass the duration of the effect
+        if (this.ticks >= this.maxTicks || !this.target.isAlive() || !Global.getCombatEngine().isEntityInPlay(this.target)) {
+            turnTraitorInternal(hitTarget, hitTeam);
+            this.fader.fadeOut();
+            this.fader.advance(amount);
+         }
+
+         //Advance the interval
+         this.interval.advance(amount);
+         
+            //Safety boolean my beloved
+            if(!betrayed){
+                //Checks the closest ship
                 if (nearestShip.getOwner() == 1) {
+                    //Turns the enemy traitor and sets their target
                     turnTraitor(hitTarget);
                     hitTarget.setShipTarget(nearestShip);
                 } else {
+                    //Else sets them to target the closest ship
                     hitTarget.setShipTarget(nearestShip);
                 }
-
-                if(upTime >= 10f){
-                    target.setOwner(hitTeam);
-                    upTime = 0f;
-                }
-
+                betrayed = true;
             }
             
 
-        }
+        //Increments the tick counter while the interval is valid
+        if (this.interval.intervalElapsed() && this.ticks <= this.maxTicks) {
 
-    }
+            ++this.ticks;
+         }
 
-    public void advance(float amount) {
-        if (!Global.getCombatEngine().isPaused()) {
-
-            this.interval.advance(amount);
-            if (this.interval.intervalElapsed() && this.upTime < 20) {
-
-                ++this.upTime;
-            }
-
-        }
-    }
-
+      }
+   
     private static void turnTraitorInternal(ShipAPI ship, int newOwner) {
         // Switch to the opposite side
         ship.setOwner(newOwner);
@@ -113,4 +139,12 @@ public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin imple
         }
     }
 
+
+   public void render(CombatEngineLayers layer, ViewportAPI viewport) {
+
+      GL14.glBlendEquation(32779);
+      
+
+      GL14.glBlendEquation(32774);
+   }
 }

@@ -75,6 +75,11 @@ public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin {
          //Advance the interval
          this.interval.advance(amount);
          
+            
+
+        //Increments the tick counter while the interval is valid
+        if (this.interval.intervalElapsed() && this.ticks <= this.maxTicks) {
+            
             //Safety boolean my beloved
             if(!betrayed){
                 //Checks the closest ship
@@ -89,10 +94,6 @@ public class BerserkTriggerEffect extends BaseCombatLayeredRenderingPlugin {
                 betrayed = true;
             }
             
-
-        //Increments the tick counter while the interval is valid
-        if (this.interval.intervalElapsed() && this.ticks <= this.maxTicks) {
-
             ++this.ticks;
          }
 

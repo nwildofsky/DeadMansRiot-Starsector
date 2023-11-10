@@ -161,6 +161,11 @@ public class LazarusSystem
 		berserkDebris.setCircularOrbitPointingDown(GetYurei(), 360 * (float)Math.random(), 300f, 15f);
 		berserkDebris.setId("berserk_debris");
 
+        DropData d = new DropData();
+        d.chances = 300;
+        d.group = "extended";
+        berserkDebris.addDropRandom(d);
+
         CargoAPI weaponCargo = Global.getFactory().createCargo(false);
         weaponCargo.addWeapons("berserkcanon", 1);
         BaseSalvageSpecial.addExtraSalvage(berserkDebris, weaponCargo);

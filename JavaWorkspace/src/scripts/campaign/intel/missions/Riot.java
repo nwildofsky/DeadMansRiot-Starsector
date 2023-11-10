@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
+import com.fs.starfarer.api.campaign.listeners.ExtraSalvageShownListener;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
@@ -24,7 +25,6 @@ import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.*;
 import com.fs.starfarer.api.impl.campaign.missions.hub.BaseHubMission;
 import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithBarEvent;
-import com.fs.starfarer.api.impl.campaign.procgen.themes.RemnantSeededFleetManager.RemnantFleetInteractionConfigGen;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.MarketCMD.TempData;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -40,7 +40,7 @@ import java.util.Map;
 import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 
-public class Riot extends HubMissionWithBarEvent implements FleetEventListener, ColonyPlayerHostileActListener
+public class Riot extends HubMissionWithBarEvent implements FleetEventListener, ColonyPlayerHostileActListener, ExtraSalvageShownListener
 {
 
     // mission stages
@@ -198,6 +198,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             {
                 Global.getLogger(this.getClass()).info("Planet has been raided, trigger encountered!");
                 Global.getSector().getListenerManager().removeListener(base);
+                Global.getSector().getListenerManager().addListener(base);
                 LazarusSystem.addBerserkDebris();
             }
         });
@@ -218,6 +219,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Yurei Planet market was raided, trigger encountered!");
+                Global.getSector().getListenerManager().removeListener(base);
             }
         });
         endTrigger();
@@ -462,8 +464,16 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         // }
     }
 
+    // COLONY PLAYER HOSTILE ACT LISTENER FUNCTIONS
+
     @Override
     public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, CargoAPI cargo) 
+    {
+        throw new UnsupportedOperationException("Unimplemented method 'reportRaidForValuablesFinishedBeforeCargoShown'");
+    }
+
+    @Override
+    public void reportRaidToDisruptFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, Industry cargo) 
     {
         if(market.getId().equals("yurei_market"))
         {
@@ -472,12 +482,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 getPerson().getMemoryWithoutUpdate().set("$riot_grabcore", true);
             }
         }
-    }
-
-    @Override
-    public void reportRaidToDisruptFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, Industry cargo) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'reportRaidToDisruptFinished'");
     }
 
     @Override
@@ -586,5 +590,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     @Override
     public String getBaseName() {
         return "Dead Man's Riot";
+    }
+
+    @Override
+    public void reportExtraSalvageShown(SectorEntityToken entity) 
+    {        
+        if(currentStage == Stage.GRAB_CORE && entity.isInOrNearSystem(system))
+            getPerson().getMemoryWithoutUpdate().set("$riot_defendself", true);
     }
 }

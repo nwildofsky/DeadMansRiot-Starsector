@@ -3,6 +3,7 @@ package scripts.world.systems;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.Condition;
 import com.fs.starfarer.api.Global;
@@ -27,6 +28,7 @@ import com.fs.starfarer.api.impl.campaign.procgen.StarSystemGenerator;
 import com.fs.starfarer.api.impl.campaign.procgen.SalvageEntityGenDataSpec.DropData;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.BaseThemeGenerator;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.SalvageSpecialAssigner.ShipRecoverySpecialCreator;
+import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.BaseSalvageSpecial;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.ShipRecoverySpecial.PerShipData;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.ShipRecoverySpecial.ShipCondition;
 import com.fs.starfarer.api.impl.campaign.terrain.AsteroidFieldTerrainPlugin.AsteroidFieldParams;
@@ -65,18 +67,68 @@ public class LazarusSystem
     protected static CustomCampaignEntityAPI fleetCombatLoc2;
 
     // Static Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Getters
+    public static StarSystemAPI GetSystem()
+    {
+        if (system == null)
+        {
+            system = Global.getSector().getStarSystem("lazarus");
+        }
+
+        return system;
+    }
+
+    public static PlanetAPI GetYurei()
+    {
+        if (yurei == null)
+        {
+            List<PlanetAPI> planets = GetSystem().getPlanets();
+            for (PlanetAPI p : planets)
+            {
+                if (p.getId().equals("yurei"))
+                {
+                    yurei = p;
+                    continue;
+                }
+            }
+        }
+
+        return yurei;
+    }
+
+    public static MarketAPI GetYureiMarket()
+    {
+        if (yureiMarket == null)
+        {
+            yureiMarket = GetYurei().getMarket();
+        }
+
+        return yureiMarket;
+    }
+
     public static CustomCampaignEntityAPI GetCombatLoc1()
     {
+        if (fleetCombatLoc1 == null)
+        {
+            //TODO
+        }
+
         return fleetCombatLoc1;
     }
     public static CustomCampaignEntityAPI GetCombatLoc2()
     {
+        if (fleetCombatLoc2 == null)
+        {
+            //TODO
+        }
+
         return fleetCombatLoc2;
     }
 
+    // Delayed World Actions
     public static void integrateMarket()
     {
-        Global.getSector().getEconomy().addMarket(yureiMarket, true);
+        Global.getSector().getEconomy().addMarket(GetYureiMarket(), true);
     }
 
     public static void addMarketAIAdmin()
@@ -89,9 +141,9 @@ public class LazarusSystem
         admin.setPersonality("reckless");
         admin.setPostId(Ranks.POST_ADMINISTRATOR);
         admin.setRankId(Ranks.TERRORIST);
-        yureiMarket.getCommDirectory().addPerson(admin, 0);
+        GetYureiMarket().getCommDirectory().addPerson(admin, 0);
         //yureiMarket.addPerson(admin);
-        yureiMarket.setAdmin(admin);
+        GetYureiMarket().setAdmin(admin);
     }
 
     public static void addBerserkDebris()
@@ -103,15 +155,15 @@ public class LazarusSystem
             10000000f);// days the field will keep generating glowing pieces
 		debrisParams.source = DebrisFieldSource.BATTLE;
 		debrisParams.baseSalvageXP = 500; // base XP for scavenging in field
-		berserkDebris = addDebrisField(system, debrisParams, StarSystemGenerator.random);
+		berserkDebris = addDebrisField(GetSystem(), debrisParams, StarSystemGenerator.random);
 		berserkDebris.setSensorProfile(null);
 		berserkDebris.setDiscoverable(true);
-		berserkDebris.setCircularOrbitPointingDown(yurei, 360 * (float)Math.random(), 300f, 15f);
+		berserkDebris.setCircularOrbitPointingDown(GetYurei(), 360 * (float)Math.random(), 300f, 15f);
 		berserkDebris.setId("berserk_debris");
 
-        DropData d = new DropData();
-        d.addWeapon("berserkcannon", 2);
-        berserkDebris.addDropRandom(d);
+        CargoAPI weaponCargo = Global.getFactory().createCargo(false);
+        weaponCargo.addWeapons("berserkcanon", 1);
+        BaseSalvageSpecial.addExtraSalvage(berserkDebris, weaponCargo);
     }
 
     public static void addModWeaponToDebris()
@@ -305,11 +357,11 @@ public class LazarusSystem
 
         // Locations to be used for fleet generation and placement
         // Removed so that the icons don't appear on the map
-        fleetCombatLoc1 = system.addCustomEntity("fleet_combat_loc", null, "mission_location", null);
+        fleetCombatLoc1 = system.addCustomEntity("fleet_combat_loc1", null, "mission_location", null);
 		fleetCombatLoc1.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist - 50, 370f);
         system.removeEntity(fleetCombatLoc1);
 
-        fleetCombatLoc2 = system.addCustomEntity("fleet_combat_loc", null, "mission_location", null);
+        fleetCombatLoc2 = system.addCustomEntity("fleet_combat_loc2", null, "mission_location", null);
 		fleetCombatLoc2.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist + 50, 370f);
         system.removeEntity(fleetCombatLoc2);
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -188,6 +188,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             {
                 Global.getLogger(this.getClass()).info("Raid planet new objective, trigger encountered!");
                 Global.getSector().getListenerManager().addListener(base);
+                LazarusSystem.integrateMarket();
             }
         });
         endTrigger();
@@ -199,19 +200,11 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Planet has been raided, trigger encountered!");
-                Global.getSector().getListenerManager().removeListener(base);
-                Global.getSector().getListenerManager().addListener(base);
+                //Global.getSector().getListenerManager().removeListener(base);
+                //Global.getSector().getListenerManager().addListener(base);
                 LazarusSystem.addBerserkDebris();
             }
         });
-        // triggerRunScriptAfterDelay(.2f, new Script() {
-        //     @Override
-        //     public void run()
-        //     {
-        //         Global.getLogger(this.getClass()).info("Berserk Weapon added to debris, delay trigger encountered!");
-        //         LazarusSystem.addModWeaponToDebris();
-        //     }
-        // });
         endTrigger();
 
         // Transition goal from GRAB_CORE to DEFEND_SELF
@@ -220,7 +213,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             @Override
             public void run()
             {
-                Global.getLogger(this.getClass()).info("Yurei Planet market was raided, trigger encountered!");
+                Global.getLogger(this.getClass()).info("Theta canon was picked up in salvage, trigger encountered!");
                 Global.getSector().getListenerManager().removeListener(base);
             }
         });
@@ -426,27 +419,30 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             + "Result is " + result + ". Tritachyon fleet was " + (battle.isInvolved(tritachyonFleet) ? "involved. " : "not involved. ")
             + "Fleet is " + fleet + ". PrimaryWinner is " + primaryWinner + ".");
 
-        // also credit the player if they're in the same location as the fleet and nearby
-        float distToPlayer = Misc.getDistance(fleet, Global.getSector().getPlayerFleet());
-        boolean playerInvolved = battle.isPlayerInvolved() || (fleet.isInCurrentLocation() && distToPlayer < 2000f);
+        if (fleet != null && currentStage == Stage.JOIN_BATTLE)
+        {
+            // also credit the player if they're in the same location as the fleet and nearby
+            float distToPlayer = Misc.getDistance(fleet, Global.getSector().getPlayerFleet());
+            boolean playerInvolved = battle.isPlayerInvolved() || (fleet.isInCurrentLocation() && distToPlayer < 2000f);
 
-        if (primaryWinner.equals(tritachyonFleet))
-        {
-            winningFleet = tritachyonFleet;
-            getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
-            tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachpostbattle", true);
-            tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_tritachfleet");
-            Global.getLogger(this.getClass()).info("Tritachyon fleet wins!");
-            //tritachyonFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc1(), 1000000f);
-        }
-        else if (primaryWinner.equals(luddicpathFleet))
-        {
-            winningFleet = luddicpathFleet;
-            getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
-            luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathpostbattle", true);
-            luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_luddicpathfleet");
-            Global.getLogger(this.getClass()).info("Luddic Path fleet wins!");
-            //luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
+            if (primaryWinner.equals(tritachyonFleet))
+            {
+                winningFleet = tritachyonFleet;
+                getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
+                tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachpostbattle", true);
+                tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_tritachfleet");
+                Global.getLogger(this.getClass()).info("Tritachyon fleet wins!");
+                //tritachyonFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc1(), 1000000f);
+            }
+            else if (primaryWinner.equals(luddicpathFleet))
+            {
+                winningFleet = luddicpathFleet;
+                getPerson().getMemoryWithoutUpdate().set("$riot_afteraction", true);
+                luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathpostbattle", true);
+                luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_luddicpathfleet");
+                Global.getLogger(this.getClass()).info("Luddic Path fleet wins!");
+                //luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
+            }
         }
     }
 

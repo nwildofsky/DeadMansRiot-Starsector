@@ -136,6 +136,7 @@ public class LazarusSystem
         // Add the rogue AI as the planet admin and add it into the comm directory
         PersonAPI admin = Global.getFactory().createPerson();
         admin.setId("theta_ai_admin");
+        admin.setFaction(Factions.INDEPENDENT);
         admin.setName(new FullName("Theta", "AI Core", FullName.Gender.ANY));
         admin.setPortraitSprite("graphics/portraits/portrait_ai2.png");
         admin.setPersonality("reckless");
@@ -169,11 +170,6 @@ public class LazarusSystem
         CargoAPI weaponCargo = Global.getFactory().createCargo(false);
         weaponCargo.addWeapons("berserkcanon", 1);
         BaseSalvageSpecial.addExtraSalvage(berserkDebris, weaponCargo);
-    }
-
-    public static void addModWeaponToDebris()
-    {
-        berserkDebris.getCargo().addItems(CargoItemType.WEAPONS, "berserkcanon", 1);
     }
 
     // Responsible for create the Lazarus System, called on the start of a new game
@@ -221,6 +217,7 @@ public class LazarusSystem
 		yureiMarket.setFactionId(Factions.TRITACHYON);
 		
 		yureiMarket.setSurveyLevel(SurveyLevel.NONE);
+        yureiMarket.setPlayerOwned(false);
 		yureiMarket.setPrimaryEntity(yurei);
 		yureiMarket.getConnectedEntities().add(abattoirStation);
 		
@@ -244,11 +241,10 @@ public class LazarusSystem
 		yureiMarket.setUseStockpilesForShortages(true);
 
         // Set the raid target on a specific industry
-        yureiMarket.getIndustry(Industries.MILITARYBASE).setAICoreId("theta_core");
+        //yureiMarket.getIndustry(Industries.MILITARYBASE).setAICoreId("theta_core");
         
         abattoirStation.setMarket(yureiMarket);
 		yurei.setMarket(yureiMarket);
-        integrateMarket();
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -299,7 +295,6 @@ public class LazarusSystem
         int randSign = Math.random() > 0.5 ? 1 : -1;
         float jumpPointAngle = (planetAngle + 150 * randSign) % 360f;
         JumpPointAPI jumpPoint = Global.getFactory().createJumpPoint("lazarus_jump", "Lazarus System Jump");
-        jumpPoint.setCircularOrbit(system.getEntityById("Erythema"), jumpPointAngle, jumpPointDist, 400f);
         jumpPoint.setStandardWormholeToHyperspaceVisual();
 
         system.addEntity(jumpPoint);
@@ -363,11 +358,11 @@ public class LazarusSystem
         // Locations to be used for fleet generation and placement
         // Removed so that the icons don't appear on the map
         fleetCombatLoc1 = system.addCustomEntity("fleet_combat_loc1", null, "mission_location", null);
-		fleetCombatLoc1.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist - 50, 370f);
+		fleetCombatLoc1.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist - 50, 320f);
         system.removeEntity(fleetCombatLoc1);
 
         fleetCombatLoc2 = system.addCustomEntity("fleet_combat_loc2", null, "mission_location", null);
-		fleetCombatLoc2.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist + 50, 370f);
+		fleetCombatLoc2.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist + 50, 320f);
         system.removeEntity(fleetCombatLoc2);
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

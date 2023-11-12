@@ -151,6 +151,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             {
                 Global.getLogger(this.getClass()).info("Lazarus System reached, trigger encountered!");
                 LazarusSystem.addMarketAIAdmin();
+                luddicpathFleet.setAI(null);
+                tritachyonFleet.setAI(null);
             }
         });
         endTrigger();
@@ -348,6 +350,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         if (action.equals("startRaid"))
         {
             getPerson().getMemoryWithoutUpdate().set("$riot_raidplanet", true);
+            winningFleet.getMemoryWithoutUpdate().unset(MemFlags.ENTITY_MISSION_IMPORTANT);
             return true;
         }
         return false;

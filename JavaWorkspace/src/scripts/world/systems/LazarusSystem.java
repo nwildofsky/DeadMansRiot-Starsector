@@ -294,7 +294,9 @@ public class LazarusSystem
         // Randomly pick a direction for this angle
         int randSign = Math.random() > 0.5 ? 1 : -1;
         float jumpPointAngle = (planetAngle + 150 * randSign) % 360f;
+        
         JumpPointAPI jumpPoint = Global.getFactory().createJumpPoint("lazarus_jump", "Lazarus System Jump");
+        jumpPoint.setCircularOrbit(system.getEntityById("Erythema"), jumpPointAngle, jumpPointDist, 400f);
         jumpPoint.setStandardWormholeToHyperspaceVisual();
 
         system.addEntity(jumpPoint);

@@ -3,6 +3,7 @@ package scripts.plugins;
 import com.fs.starfarer.api.combat.OnHitEffectPlugin;
 import com.fs.starfarer.api.combat.ShipAPI;
 
+import org.lazywizard.lazylib.combat.AIUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 
@@ -28,15 +29,16 @@ public class BerserkTriggerApply implements OnHitEffectPlugin {
         if (!shieldHit) {
            if (!proj.isFading()) {
               if (target instanceof ShipAPI) {
-                 Vector2f offset = Vector2f.sub(point, target.getLocation(), new Vector2f());
-                 offset = Misc.rotateAroundOrigin(offset, -target.getFacing());
-                 
-                 int alpha = 20;
+                  Vector2f offset = Vector2f.sub(point, target.getLocation(), new Vector2f());
+                  offset = Misc.rotateAroundOrigin(offset, -target.getFacing());
 
-                 //See BerserkTriggerEffect for the internals
-                 BerserkTriggerEffect effect = new BerserkTriggerEffect(proj, (ShipAPI)target, offset, alpha, 10);
-                 CombatEntityAPI e = engine.addLayeredRenderingPlugin(effect);
-                 e.getLocation().set(proj.getLocation());
+                  int alpha = 20;
+
+
+                  //See BerserkTriggerEffect for the internals
+                  BerserkTriggerEffect effect = new BerserkTriggerEffect(proj, (ShipAPI)target, offset, alpha, 10);
+                  CombatEntityAPI e = engine.addLayeredRenderingPlugin(effect);
+                  e.getLocation().set(proj.getLocation());
               }
            }
         }

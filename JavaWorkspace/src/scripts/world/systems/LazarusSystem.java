@@ -51,7 +51,7 @@ public class LazarusSystem
     final float yureiDist = 3600f;
     final float stationDist = 380f;
     final float jumpPointDist = 4500f;
-    final float fleetCombatDist = 4000f;
+    static final float fleetCombatDist = 4000f;
     final float shipwreckJumpDist = 350f;
     final float wreckDebrisJumpDist = shipwreckJumpDist + 20f;
     final float shipwreckStarDist = 1200f;
@@ -65,6 +65,7 @@ public class LazarusSystem
     protected static SectorEntityToken berserkDebris;
     protected static CustomCampaignEntityAPI fleetCombatLoc1;
     protected static CustomCampaignEntityAPI fleetCombatLoc2;
+    private static float fleetCombatAngle;
 
     // Static Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Getters
@@ -110,7 +111,9 @@ public class LazarusSystem
     {
         if (fleetCombatLoc1 == null)
         {
-            //TODO
+            fleetCombatLoc1 = GetSystem().addCustomEntity("fleet_combat_loc1", null, "mission_location", null);
+            fleetCombatLoc1.setCircularOrbitPointingDown(GetSystem().getStar(), GetFleetCombatAngle(), fleetCombatDist - 50, 320f);
+            GetSystem().removeEntity(fleetCombatLoc1);
         }
 
         return fleetCombatLoc1;
@@ -119,10 +122,35 @@ public class LazarusSystem
     {
         if (fleetCombatLoc2 == null)
         {
-            //TODO
+            fleetCombatLoc2 = GetSystem().addCustomEntity("fleet_combat_loc2", null, "mission_location", null);
+            fleetCombatLoc2.setCircularOrbitPointingDown(GetSystem().getStar(), GetFleetCombatAngle(), fleetCombatDist + 50, 320f);
+            GetSystem().removeEntity(fleetCombatLoc2);
         }
 
         return fleetCombatLoc2;
+    }
+
+    private static float GetFleetCombatAngle()
+    {
+        if (fleetCombatAngle == 0)
+        {
+            float planetAngle = GetYurei().getCircularOrbitAngle();
+            float jumpPointAngle = GetSystem().getEntityById("lazarus_jump").getCircularOrbitAngle();
+            float difference = jumpPointAngle - planetAngle;
+            if (difference > 180f)
+            {
+                difference -= 360;
+            }
+            else if (difference < -180f)
+            {
+                difference += 360;
+            }
+
+            float direction = Math.signum(difference);
+            fleetCombatAngle = planetAngle + ((70f * (float)Math.random() + 45f) * direction) % 360f;
+        }
+
+        return fleetCombatAngle;
     }
 
     // Delayed World Actions
@@ -355,7 +383,7 @@ public class LazarusSystem
 
         //#region Fleets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // Locations are between the planet and the jump point
-        float fleetCombatAngle = planetAngle + ((70f * (float)Math.random() + 45f) * randSign) % 360f;
+        fleetCombatAngle = planetAngle + ((70f * (float)Math.random() + 45f) * randSign) % 360f;
 
         // Locations to be used for fleet generation and placement
         // Removed so that the icons don't appear on the map

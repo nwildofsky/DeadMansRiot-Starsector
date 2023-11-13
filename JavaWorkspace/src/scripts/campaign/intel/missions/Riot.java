@@ -355,7 +355,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 tritachyonBetrayalFleet.getFleetData().syncIfNeeded();
                 tritachyonBetrayalFleet.setTransponderOn(true);
 
-                tritachyonBetrayalFleet.getMemoryWithoutUpdate().set("$riot_tritachfleet", true);
+                tritachyonBetrayalFleet.getMemoryWithoutUpdate().set("$riot_tritachfleetbetrayal", true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
@@ -399,7 +399,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 luddicpathBetrayalFleet.getFleetData().syncIfNeeded();
                 luddicpathBetrayalFleet.setTransponderOn(true);
 
-                luddicpathBetrayalFleet.getMemoryWithoutUpdate().set("$riot_luddicpathfleet", true);
+                luddicpathBetrayalFleet.getMemoryWithoutUpdate().set("$riot_luddicpathfleetbetrayal", true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
@@ -537,6 +537,14 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 //luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
             }
         }
+        else if (fleet != null && currentStage == Stage.DEFEND_SELF)
+        {
+
+                if (battle.isPlayerPrimary())
+                {
+                    getPerson().getMemoryWithoutUpdate().set("$riot_completed", true);
+                }
+        }
     }
 
     // if the fleet despawns for whatever reason, fail the mission
@@ -561,7 +569,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     @Override
     public void reportRaidForValuablesFinishedBeforeCargoShown(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, CargoAPI cargo) 
     {
-        throw new UnsupportedOperationException("Unimplemented method 'reportRaidForValuablesFinishedBeforeCargoShown'");
+        //We're not using this
+        
     }
 
     @Override
@@ -577,15 +586,17 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     }
 
     @Override
-    public void reportSaturationBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'reportSaturationBombardmentFinished'");
+    public void reportSaturationBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) 
+    {
+        //We're not using this
+        
     }
 
     @Override
-    public void reportTacticalBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'reportTacticalBombardmentFinished'");
+    public void reportTacticalBombardmentFinished(InteractionDialogAPI arg0, MarketAPI arg1, TempData arg2) 
+    {
+        //We're not using this
+        
     }
 
     // description when selected in intel screen

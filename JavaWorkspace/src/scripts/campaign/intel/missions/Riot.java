@@ -202,8 +202,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Planet has been raided, trigger encountered!");
-                //Global.getSector().getListenerManager().removeListener(base);
-                //Global.getSector().getListenerManager().addListener(base);
                 LazarusSystem.addBerserkDebris();
             }
         });
@@ -217,7 +215,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             {
                 Global.getLogger(this.getClass()).info("Theta canon was picked up in salvage, trigger encountered!");
                 createMissionFleets(2);
-                Global.getSector().getListenerManager().removeListener(base);
             }
         });
         endTrigger();
@@ -240,6 +237,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Quest giver has been re-contacted, mission complete, trigger encountered!");
+                Global.getSector().getListenerManager().removeListener(base);
             }
         });
         endTrigger();
@@ -514,10 +512,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
         if (fleet != null && currentStage == Stage.JOIN_BATTLE)
         {
-            // also credit the player if they're in the same location as the fleet and nearby
-            float distToPlayer = Misc.getDistance(fleet, Global.getSector().getPlayerFleet());
-            boolean playerInvolved = battle.isPlayerInvolved() || (fleet.isInCurrentLocation() && distToPlayer < 2000f);
-
             if (primaryWinner.equals(tritachyonFleet))
             {
                 winningFleet = tritachyonFleet;
@@ -537,13 +531,20 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 //luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
             }
         }
-        else if (fleet != null && currentStage == Stage.DEFEND_SELF)
+        else if (currentStage == Stage.DEFEND_SELF)
         {
-
-                if (battle.isPlayerPrimary())
-                {
-                    getPerson().getMemoryWithoutUpdate().set("$riot_completed", true);
-                }
+            if (battle.isInvolved(tritachyonBetrayalFleet) || battle.isInvolved(luddicpathBetrayalFleet))
+            {
+                getPerson().getMemoryWithoutUpdate().set("$riot_completed", true);
+            }
+            else
+            {
+                Global.getLogger(this.getClass()).info("Was one of the betrayal fleets involved? Tritach betray: " + (battle.isInvolved(tritachyonBetrayalFleet) ? "yes." : "no.") + "/nLuddic Betray: " + (battle.isInvolved(luddicpathBetrayalFleet) ? "yes." : "no.") + "/nWas the player the primary winner?" + (battle.isPlayerPrimary() ? "yes." : "no."));
+            }
+        }
+        else
+        {
+            Global.getLogger(this.getClass()).info("Neither in the Join Battle nor Defend Self stage.");
         }
     }
 
@@ -576,6 +577,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     @Override
     public void reportRaidToDisruptFinished(InteractionDialogAPI dialog, MarketAPI market, TempData actionData, Industry cargo) 
     {
+        //TO-DO: Make it where player has to disrupt a specific location
         if(market.getId().equals("yurei_market"))
         {
             if(currentStage == Stage.RAID_PLANET)

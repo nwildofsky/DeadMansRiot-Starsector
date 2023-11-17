@@ -104,7 +104,19 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         tritachyonCommander.getMemoryWithoutUpdate().set("$riot_tritachComm", true);
 
         luddicpathCommander = Global.getSector().getFaction(Factions.LUDDIC_PATH).createRandomPerson();
-        luddicpathCommander.setRankId(Ranks.BROTHER);
+        switch(luddicpathCommander.getGender())
+        {
+            case FEMALE:
+                luddicpathCommander.setRankId(Ranks.SISTER);
+                break;
+            case MALE:
+                luddicpathCommander.setRankId(Ranks.BROTHER);
+                break;
+            default:
+                luddicpathCommander.setRankId(Ranks.TERRORIST);
+                break;
+            
+        }
         luddicpathCommander.setPostId(Ranks.POST_TERRORIST);
         luddicpathCommander.getMemoryWithoutUpdate().set("$riot_luddicpathComm", true);
         
@@ -261,6 +273,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Mission failed, trigger encountered!");
+                if(Global.getSector().getListenerManager().hasListener(base))
+                    Global.getSector().getListenerManager().removeListener(base);
             }
         });
         endTrigger();
@@ -517,7 +531,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         set("$riot_tritachCommName", tritachyonCommander.getNameString());
         set("$riot_luddicpathCommName", luddicpathCommander.getNameString());
         set("$riot_systemName", system.getNameWithLowercaseTypeShort());
-        set("$riot_dist", getDistanceLY(system));
+        set("$riot_planetName", system.getEntityById("yurei").getName());
     }
 
     public void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle)
@@ -569,7 +583,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     // if the fleet despawns for whatever reason, fail the mission
     public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason, Object param) 
     {
-        if (isDone() || result != null) return;
+        if (isDone() || result != null || fleet == null) return;
 
         if (fleet.getMemoryWithoutUpdate().contains("$riot_donotkill")) {
             getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
@@ -630,9 +644,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         } else if (currentStage == Stage.AFTER_ACTION_REPORT) {
             info.addPara("Talk to the commander of the fleet you aided .", opad);
         } else if (currentStage == Stage.RAID_PLANET) {
-            info.addPara("Raid Yurei for the AI", opad);
+            info.addPara("Raid to disrupt Yurei for the AI", opad);
         } else if (currentStage == Stage.GRAB_CORE) {
-            info.addPara("Grab the AI core in the debris field", opad);
+            info.addPara("Find the AI core in the debris field", opad);
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Report back to the fleet commander with the AI.", opad);
         } else if (currentStage == Stage.CONTACT_GIVER) {
@@ -663,10 +677,10 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             info.addPara("Talk to the fleet commander of the faction you have aided.", tc, pad);
             return true;
         } else if (currentStage == Stage.RAID_PLANET) {
-            info.addPara("Raid the planet Yurei for the AI core.", tc, pad);
+            info.addPara("Raid to disrupt the planet Yurei for the AI core.", tc, pad);
             return true;
         } else if (currentStage == Stage.GRAB_CORE) {
-            info.addPara("Grab the Rogue AI Core in the debris field.", tc, pad);
+            info.addPara("Find the Rogue AI Core in the debris field.", tc, pad);
             return true;
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Return to the fleet that you aided with the AI core.", tc, pad);

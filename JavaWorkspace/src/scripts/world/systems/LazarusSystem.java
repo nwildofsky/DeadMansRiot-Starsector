@@ -139,7 +139,11 @@ public class LazarusSystem
     public static void integrateMarket()
     {
         Global.getSector().getEconomy().addMarket(GetYureiMarket(), false);
-        GetYureiMarket().setPlayerOwned(false);
+    }
+
+    public static void unHideMarket()
+    {
+        GetYureiMarket().setHidden(false);
     }
 
     public static void addMarketAIAdmin()
@@ -241,7 +245,7 @@ public class LazarusSystem
 		yureiMarket.addIndustry(Industries.POPULATION);
 		yureiMarket.addIndustry(Industries.SPACEPORT);
 		yureiMarket.addIndustry(Industries.ORBITALSTATION);
-        yureiMarket.addIndustry(Industries.MILITARYBASE);
+        //yureiMarket.addIndustry(Industries.MILITARYBASE);
         yureiMarket.addIndustry(Industries.GROUNDDEFENSES);
         yureiMarket.addIndustry(Industries.HEAVYBATTERIES);
 
@@ -255,6 +259,8 @@ public class LazarusSystem
         
         abattoirStation.setMarket(yureiMarket);
 		yurei.setMarket(yureiMarket);
+        yureiMarket.setHidden(true);
+        integrateMarket();
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

@@ -1,28 +1,17 @@
 package scripts.world.systems;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.locks.Condition;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.*;
-import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
-import com.fs.starfarer.api.campaign.ai.CampaignFleetAIAPI.EncounterOption;
-import com.fs.starfarer.api.campaign.econ.EconomyAPI;
-import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI.SurveyLevel;
 import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
-import com.fs.starfarer.api.combat.ShipCommand;
-import com.fs.starfarer.api.fleet.FleetMemberType;
-import com.fs.starfarer.api.impl.campaign.FleetEncounterContext;
 import com.fs.starfarer.api.impl.campaign.DerelictShipEntityPlugin.DerelictShipData;
 import com.fs.starfarer.api.impl.campaign.ids.*;
 import com.fs.starfarer.api.impl.campaign.procgen.NebulaEditor;
-import com.fs.starfarer.api.impl.campaign.procgen.PlanetConditionGenerator;
 import com.fs.starfarer.api.impl.campaign.procgen.StarAge;
 import com.fs.starfarer.api.impl.campaign.procgen.StarSystemGenerator;
 import com.fs.starfarer.api.impl.campaign.procgen.SalvageEntityGenDataSpec.DropData;
@@ -31,16 +20,11 @@ import com.fs.starfarer.api.impl.campaign.procgen.themes.SalvageSpecialAssigner.
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.BaseSalvageSpecial;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.ShipRecoverySpecial.PerShipData;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.ShipRecoverySpecial.ShipCondition;
-import com.fs.starfarer.api.impl.campaign.terrain.AsteroidFieldTerrainPlugin.AsteroidFieldParams;
 import com.fs.starfarer.api.impl.campaign.terrain.DebrisFieldTerrainPlugin;
 import com.fs.starfarer.api.impl.campaign.terrain.DebrisFieldTerrainPlugin.DebrisFieldParams;
 import com.fs.starfarer.api.impl.campaign.terrain.DebrisFieldTerrainPlugin.DebrisFieldSource;
 import com.fs.starfarer.api.impl.campaign.terrain.HyperspaceTerrainPlugin;
 import com.fs.starfarer.api.util.Misc;
-
-import org.lazywizard.lazylib.MathUtils;
-import org.magiclib.util.MagicCampaign;
-import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 public class LazarusSystem
 {
@@ -58,105 +42,104 @@ public class LazarusSystem
     final float wreckDebrisStarDist = shipwreckStarDist + 20f;
     final float gateDist = 6800f;
 
-    // Static Fields ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    protected static StarSystemAPI system;
-    protected static PlanetAPI yurei;
-    protected static MarketAPI yureiMarket;
-    protected static SectorEntityToken berserkDebris;
-    protected static CustomCampaignEntityAPI fleetCombatLoc1;
-    protected static CustomCampaignEntityAPI fleetCombatLoc2;
-    private static float fleetCombatAngle;
-
     // Static Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Getters
     public static StarSystemAPI GetSystem()
     {
-        if (system == null)
-        {
-            system = Global.getSector().getStarSystem("lazarus");
-        }
-
-        return system;
+        return Global.getSector().getStarSystem("lazarus");
     }
 
     public static PlanetAPI GetYurei()
     {
-        if (yurei == null)
+        List<PlanetAPI> planets = GetSystem().getPlanets();
+        for (PlanetAPI p : planets)
         {
-            List<PlanetAPI> planets = GetSystem().getPlanets();
-            for (PlanetAPI p : planets)
+            if (p.getId().equals("yurei"))
             {
-                if (p.getId().equals("yurei"))
-                {
-                    yurei = p;
-                    continue;
-                }
+                return p;
             }
         }
 
-        return yurei;
+        return null;
     }
 
     public static MarketAPI GetYureiMarket()
     {
-        if (yureiMarket == null)
-        {
-            yureiMarket = GetYurei().getMarket();
-        }
-
-        return yureiMarket;
+        return GetYurei().getMarket();
     }
 
     public static CustomCampaignEntityAPI GetCombatLoc1()
     {
-        if (fleetCombatLoc1 == null)
+        if (!GetSystem().getMemoryWithoutUpdate().contains("$riot_fleetcombatloc1"))
         {
-            fleetCombatLoc1 = GetSystem().addCustomEntity("fleet_combat_loc1", null, "mission_location", null);
-            fleetCombatLoc1.setCircularOrbitPointingDown(GetSystem().getStar(), GetFleetCombatAngle(), fleetCombatDist - 50, 320f);
+            float angle;
+
+            if (GetSystem().getMemoryWithoutUpdate().contains("$riot_fleetcombatloc2"))
+            {
+                angle = ((CustomCampaignEntityAPI)GetSystem().getMemoryWithoutUpdate().get("$riot_fleetcombatloc2")).getCircularOrbitAngle();    
+            }
+            else
+            {
+                angle = GetFleetCombatAngle();
+            }
+
+            CustomCampaignEntityAPI fleetCombatLoc1 = GetSystem().addCustomEntity("fleet_combat_loc1", null, "mission_location", null);
+            fleetCombatLoc1.setCircularOrbitPointingDown(GetSystem().getStar(), angle, fleetCombatDist - 50, 320f);
             GetSystem().removeEntity(fleetCombatLoc1);
+            GetSystem().getMemoryWithoutUpdate().set("$riot_fleetcombatloc1", fleetCombatLoc1);
+
+            return fleetCombatLoc1;
         }
 
-        return fleetCombatLoc1;
+        return (CustomCampaignEntityAPI)GetSystem().getMemoryWithoutUpdate().get("$riot_fleetcombatloc1");
     }
     public static CustomCampaignEntityAPI GetCombatLoc2()
     {
-        if (fleetCombatLoc2 == null)
+        if (!GetSystem().getMemoryWithoutUpdate().contains("$riot_fleetcombatloc2"))
         {
-            fleetCombatLoc2 = GetSystem().addCustomEntity("fleet_combat_loc2", null, "mission_location", null);
-            fleetCombatLoc2.setCircularOrbitPointingDown(GetSystem().getStar(), GetFleetCombatAngle(), fleetCombatDist + 50, 320f);
+            float angle;
+
+            if (GetSystem().getMemoryWithoutUpdate().contains("$riot_fleetcombatloc1"))
+            {
+                angle = ((CustomCampaignEntityAPI)GetSystem().getMemoryWithoutUpdate().get("$riot_fleetcombatloc1")).getCircularOrbitAngle();    
+            }
+            else
+            {
+                angle = GetFleetCombatAngle();
+            }
+
+            CustomCampaignEntityAPI fleetCombatLoc2 = GetSystem().addCustomEntity("fleet_combat_loc2", null, "mission_location", null);
+            fleetCombatLoc2.setCircularOrbitPointingDown(GetSystem().getStar(), angle, fleetCombatDist + 50, 320f);
             GetSystem().removeEntity(fleetCombatLoc2);
+            GetSystem().getMemoryWithoutUpdate().set("$riot_fleetcombatloc2", fleetCombatLoc2);
         }
 
-        return fleetCombatLoc2;
+        return (CustomCampaignEntityAPI)GetSystem().getMemoryWithoutUpdate().get("$riot_fleetcombatloc2");
     }
 
     private static float GetFleetCombatAngle()
     {
-        if (fleetCombatAngle == 0)
+        float planetAngle = GetYurei().getCircularOrbitAngle();
+        float jumpPointAngle = GetSystem().getEntityById("lazarus_jump").getCircularOrbitAngle();
+        float difference = jumpPointAngle - planetAngle;
+        if (difference > 180f)
         {
-            float planetAngle = GetYurei().getCircularOrbitAngle();
-            float jumpPointAngle = GetSystem().getEntityById("lazarus_jump").getCircularOrbitAngle();
-            float difference = jumpPointAngle - planetAngle;
-            if (difference > 180f)
-            {
-                difference -= 360;
-            }
-            else if (difference < -180f)
-            {
-                difference += 360;
-            }
-
-            float direction = Math.signum(difference);
-            fleetCombatAngle = planetAngle + ((70f * (float)Math.random() + 45f) * direction) % 360f;
+            difference -= 360;
+        }
+        else if (difference < -180f)
+        {
+            difference += 360;
         }
 
-        return fleetCombatAngle;
+        float direction = Math.signum(difference);
+        return planetAngle + ((70f * (float)Math.random() + 45f) * direction) % 360f;
     }
 
     // Delayed World Actions
     public static void integrateMarket()
     {
-        Global.getSector().getEconomy().addMarket(GetYureiMarket(), true);
+        Global.getSector().getEconomy().addMarket(GetYureiMarket(), false);
+        GetYureiMarket().setPlayerOwned(false);
     }
 
     public static void addMarketAIAdmin()
@@ -184,7 +167,7 @@ public class LazarusSystem
             10000000f);// days the field will keep generating glowing pieces
 		debrisParams.source = DebrisFieldSource.BATTLE;
 		debrisParams.baseSalvageXP = 500; // base XP for scavenging in field
-		berserkDebris = addDebrisField(GetSystem(), debrisParams, StarSystemGenerator.random);
+		SectorEntityToken berserkDebris = addDebrisField(GetSystem(), debrisParams, StarSystemGenerator.random);
 		berserkDebris.setSensorProfile(null);
 		berserkDebris.setDiscoverable(true);
 		berserkDebris.setCircularOrbitPointingDown(GetYurei(), 360 * (float)Math.random(), 300f, 15f);
@@ -203,7 +186,7 @@ public class LazarusSystem
     // Responsible for create the Lazarus System, called on the start of a new game
     public void generate(SectorAPI sector)
     {
-        system = sector.createStarSystem("Lazarus");
+        StarSystemAPI system = sector.createStarSystem("Lazarus");
         system.getLocation().set(9500, 22000);
         system.setBackgroundTextureFilename("graphics/backgrounds/background6.jpg");
 
@@ -221,7 +204,7 @@ public class LazarusSystem
         // Planet
         // The planet location is placed randomly
         float planetAngle = 360f * (float)Math.random();
-        yurei = system.addPlanet("yurei",        // id
+        PlanetAPI yurei = system.addPlanet("yurei",  // id
                                 erythemaStar,    // focus
                                 "Yurei",         // name
                                 "desert",        // type
@@ -241,11 +224,10 @@ public class LazarusSystem
         abattoirStation.setCustomDescriptionId("abattoir_station");
 
         // Market
-        yureiMarket = Global.getFactory().createMarket("yurei_market", yurei.getName(), 4);
+        MarketAPI yureiMarket = Global.getFactory().createMarket("yurei_market", yurei.getName(), 4);
 		yureiMarket.setFactionId(Factions.TRITACHYON);
 		
 		yureiMarket.setSurveyLevel(SurveyLevel.NONE);
-        yureiMarket.setPlayerOwned(false);
 		yureiMarket.setPrimaryEntity(yurei);
 		yureiMarket.getConnectedEntities().add(abattoirStation);
 		
@@ -378,22 +360,6 @@ public class LazarusSystem
 		debrisBNextToStar.setDiscoverable(null);
 		debrisBNextToStar.setCircularOrbitPointingDown(erythemaStar, shipwreckB4.getCircularOrbitAngle(), wreckDebrisStarDist, 100f);
 		debrisBNextToStar.setId("lazarus_debrisBNextToStar");
-        //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-        //#region Fleets ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // Locations are between the planet and the jump point
-        fleetCombatAngle = planetAngle + ((70f * (float)Math.random() + 45f) * randSign) % 360f;
-
-        // Locations to be used for fleet generation and placement
-        // Removed so that the icons don't appear on the map
-        fleetCombatLoc1 = system.addCustomEntity("fleet_combat_loc1", null, "mission_location", null);
-		fleetCombatLoc1.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist - 50, 320f);
-        system.removeEntity(fleetCombatLoc1);
-
-        fleetCombatLoc2 = system.addCustomEntity("fleet_combat_loc2", null, "mission_location", null);
-		fleetCombatLoc2.setCircularOrbitPointingDown(erythemaStar, fleetCombatAngle, fleetCombatDist + 50, 320f);
-        system.removeEntity(fleetCombatLoc2);
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 

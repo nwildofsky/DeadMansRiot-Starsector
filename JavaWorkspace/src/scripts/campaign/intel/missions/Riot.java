@@ -152,7 +152,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Lazarus System reached, trigger encountered!");
-                LazarusSystem.addMarketAIAdmin();
+                //LazarusSystem.addMarketAIAdmin();
                 luddicpathFleet.setAI(null);
                 tritachyonFleet.setAI(null);
             }

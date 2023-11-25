@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.Script;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.JumpPointAPI.JumpDestination;
+import com.fs.starfarer.api.campaign.ReputationActionResponsePlugin.ReputationAdjustmentResult;
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
@@ -103,9 +104,22 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         tritachyonCommander.getMemoryWithoutUpdate().set("$riot_tritachComm", true);
 
         luddicpathCommander = Global.getSector().getFaction(Factions.LUDDIC_PATH).createRandomPerson();
-        luddicpathCommander.setRankId(Ranks.BROTHER);
+        switch(luddicpathCommander.getGender())
+        {
+            case FEMALE:
+                luddicpathCommander.setRankId(Ranks.SISTER);
+                break;
+            case MALE:
+                luddicpathCommander.setRankId(Ranks.BROTHER);
+                break;
+            default:
+                luddicpathCommander.setRankId(Ranks.TERRORIST);
+                break;
+            
+        }
         luddicpathCommander.setPostId(Ranks.POST_TERRORIST);
         luddicpathCommander.getMemoryWithoutUpdate().set("$riot_luddicpathComm", true);
+        
 
         // Get the Lazarus system
         requireSystemIs(Global.getSector().getStarSystem("lazarus"));
@@ -152,6 +166,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Lazarus System reached, trigger encountered!");
+                Global.getSector().getListenerManager().addListener(base);
                 LazarusSystem.addMarketAIAdmin();
                 luddicpathFleet.setAI(null);
                 tritachyonFleet.setAI(null);
@@ -189,9 +204,17 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Raid planet new objective, trigger encountered!");
-                Global.getSector().getListenerManager().addListener(base);
-                //LazarusSystem.integrateMarket();
-                LazarusSystem.unHideMarket();
+                if(winningFleet == tritachyonFleet)
+                {
+                    tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_tritachpostbattle");
+                    tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachgoraid", true);
+                }
+                else if(winningFleet == luddicpathFleet)
+                {
+                    luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_luddicpathpostbattle");
+                    luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathgoraid", true);
+                }
+                LazarusSystem.integrateMarket();
             }
         });
         endTrigger();
@@ -250,6 +273,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             public void run()
             {
                 Global.getLogger(this.getClass()).info("Mission failed, trigger encountered!");
+                if(Global.getSector().getListenerManager().hasListener(base))
+                    Global.getSector().getListenerManager().removeListener(base);
             }
         });
         endTrigger();
@@ -287,6 +312,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
+            tritachyonFleet.getMemoryWithoutUpdate().set("$riot_donotkill", true);
 
             system.addEntity(tritachyonFleet);
 
@@ -315,6 +341,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             luddicpathFleet.getFleetData().syncIfNeeded();
             luddicpathFleet.setTransponderOn(true);
 
+            luddicpathFleet.getMemoryWithoutUpdate().set("$riot_donotkill", true);
             luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathfleet", true);
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
@@ -328,7 +355,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         //Second time called, betrayal fleet
         if(timesCalled == 2){
             if(winningFleet == tritachyonFleet){
-                            
+
                 
 
                 //Build the betrayal fleet
@@ -346,7 +373,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
                 tritachyonBetrayalFleet.setCommander(tritachyonCommander);
                 tritachyonBetrayalFleet.getFlagship().setCaptain(tritachyonCommander);
-                tritachyonBetrayalFleet.setLocation(LazarusSystem.GetCombatLoc1().getLocation().x, LazarusSystem.GetCombatLoc1().getLocation().y);
+                tritachyonBetrayalFleet.setLocation(LazarusSystem.GetYurei().getLocation().x, LazarusSystem.GetYurei().getLocation().y);
                 tritachyonBetrayalFleet.addAssignment(FleetAssignment.INTERCEPT, Global.getSector().getPlayerFleet(), 1000000f);
                 tritachyonBetrayalFleet.setNoFactionInName(true);
                 tritachyonBetrayalFleet.forceSync();
@@ -360,15 +387,19 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
-                tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
-                    new IsolatedBattleFleetInteractionConfigGen());
-                system.addEntity(tritachyonBetrayalFleet);
 
+                system.addEntity(tritachyonBetrayalFleet);
+                
                 //Despawn the original fleet
+                tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_donotkill");
                 tritachyonFleet.despawn();
             }
 
             if(winningFleet == luddicpathFleet){
+
+                //Despawn the original fleet
+                luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_donotkill");
+                luddicpathFleet.despawn();
 
                 luddicpathBetrayalFleet = Global.getFactory().createEmptyFleet(Factions.LUDDIC_PATH, "Lazarus Luddic Path Fleet", true);
                 CampaignUtils.addShipToFleet("prometheus2_Standard", FleetMemberType.SHIP, luddicpathBetrayalFleet);
@@ -388,7 +419,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
                 luddicpathBetrayalFleet.setCommander(luddicpathCommander);
                 luddicpathBetrayalFleet.getFlagship().setCaptain(luddicpathCommander);
-                luddicpathBetrayalFleet.setLocation(LazarusSystem.GetCombatLoc1().getLocation().x, LazarusSystem.GetCombatLoc1().getLocation().y);
+                luddicpathBetrayalFleet.setLocation(LazarusSystem.GetYurei().getLocation().x, LazarusSystem.GetYurei().getLocation().y);
                 luddicpathBetrayalFleet.addAssignment(FleetAssignment.INTERCEPT, Global.getSector().getPlayerFleet(), 1000000f);
                 luddicpathBetrayalFleet.setNoFactionInName(true);
                 luddicpathBetrayalFleet.forceSync();
@@ -402,12 +433,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
-                luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
-                    new IsolatedBattleFleetInteractionConfigGen());
-                system.addEntity(luddicpathBetrayalFleet);
 
-                //Despawn the original fleet
-                luddicpathFleet.despawn();
+                system.addEntity(luddicpathBetrayalFleet);
             }
         }
 
@@ -419,6 +446,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         if (action.equals("helpTritach"))
         {
             luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE);
+            luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_donotkill");
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_REP_IMPACT, true);
@@ -429,6 +457,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         if (action.equals("helpLuddic"))
         {
             tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE);
+            tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_donotkill");
             tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
             luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_REP_IMPACT, true);
@@ -451,13 +480,11 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         helpingFleet.getMemoryWithoutUpdate().set("$riot_allySelected", true);
 
         luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
-        //luddicpathFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
         luddicpathFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
             new IsolatedBattleFleetInteractionConfigGen());
         
         tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
-        //tritachyonFleet.getMemoryWithoutUpdate().unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_FIGHT_TO_THE_LAST, true);
         tritachyonFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
             new IsolatedBattleFleetInteractionConfigGen());
@@ -504,14 +531,18 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         set("$riot_tritachCommName", tritachyonCommander.getNameString());
         set("$riot_luddicpathCommName", luddicpathCommander.getNameString());
         set("$riot_systemName", system.getNameWithLowercaseTypeShort());
-        set("$riot_dist", getDistanceLY(system));
+        set("$riot_planetName", system.getEntityById("yurei").getName());
     }
 
     public void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle)
     {
         Global.getLogger(this.getClass()).info("Fleet Listener found battle! Battle is " + (battle.isDone() ? "done. " : "not done. ")
-            + "Result is " + result + ". Tritachyon fleet was " + (battle.isInvolved(tritachyonFleet) ? "involved. " : "not involved. ")
-            + "Fleet is " + fleet + ". PrimaryWinner is " + primaryWinner + ".");
+        + "Result is " + result + ". Tritachyon fleet was " + (battle.isInvolved(tritachyonFleet) ? "involved. " : "not involved. ")
+        + "Fleet is " + fleet + ". PrimaryWinner is " + primaryWinner + ".");
+
+        
+        if((tritachyonFleet.getMemoryWithoutUpdate().contains("riot_donotkill") && !tritachyonFleet.isAlive()) || (luddicpathFleet.getMemoryWithoutUpdate().contains("riot_donotkill") && !luddicpathFleet.isAlive()))
+            getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
 
         if (fleet != null && currentStage == Stage.JOIN_BATTLE)
         {
@@ -522,7 +553,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 tritachyonFleet.getMemoryWithoutUpdate().set("$riot_tritachpostbattle", true);
                 tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_tritachfleet");
                 Global.getLogger(this.getClass()).info("Tritachyon fleet wins!");
-                //tritachyonFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc1(), 1000000f);
             }
             else if (primaryWinner.equals(luddicpathFleet))
             {
@@ -531,7 +561,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathpostbattle", true);
                 luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_luddicpathfleet");
                 Global.getLogger(this.getClass()).info("Luddic Path fleet wins!");
-                //luddicpathFleet.addAssignment(FleetAssignment.HOLD, LazarusSystem.GetCombatLoc2(), 1000000f);
             }
         }
         else if (currentStage == Stage.DEFEND_SELF)
@@ -552,20 +581,13 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     }
 
     // if the fleet despawns for whatever reason, fail the mission
-    public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason, Object param) {
-        // This does not work as I thought it did and we're not currently using it anyway -Nathan
-        // if (isDone() || result != null) return;
+    public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason, Object param) 
+    {
+        if (isDone() || result != null || fleet == null) return;
 
-        // Global.getLogger(this.getClass()).info("Fleet reported as despawned! Current fleet was "
-        //     + (Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet) ? "involved" : "not involved")
-        //     + " in a player battle when it despawned");
-        // if (!Global.getSector().getPlayerFleet().getBattle().isInvolved(fleet))
-        // {
-        //     if (fleet.getMemoryWithoutUpdate().contains("$riot_tritachfleet") || fleet.getMemoryWithoutUpdate().contains("$riot_luddicpathfleet"))
-        //     {
-        //         getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
-        //     }
-        // }
+        if (fleet.getMemoryWithoutUpdate().contains("$riot_donotkill")) {
+            getPerson().getMemoryWithoutUpdate().set("$riot_failed", true);
+        }
     }
 
     // COLONY PLAYER HOSTILE ACT LISTENER FUNCTIONS
@@ -622,9 +644,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         } else if (currentStage == Stage.AFTER_ACTION_REPORT) {
             info.addPara("Talk to the commander of the fleet you aided .", opad);
         } else if (currentStage == Stage.RAID_PLANET) {
-            info.addPara("Raid Yurei for the AI", opad);
+            info.addPara("Raid to disrupt Yurei for the AI", opad);
         } else if (currentStage == Stage.GRAB_CORE) {
-            info.addPara("Grab the AI core in the debris field", opad);
+            info.addPara("Find the AI core in the debris field", opad);
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Report back to the fleet commander with the AI.", opad);
         } else if (currentStage == Stage.CONTACT_GIVER) {
@@ -655,10 +677,10 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             info.addPara("Talk to the fleet commander of the faction you have aided.", tc, pad);
             return true;
         } else if (currentStage == Stage.RAID_PLANET) {
-            info.addPara("Raid the planet Yurei for the AI core.", tc, pad);
+            info.addPara("Raid to disrupt the planet Yurei for the AI core.", tc, pad);
             return true;
         } else if (currentStage == Stage.GRAB_CORE) {
-            info.addPara("Grab the Rogue AI Core in the debris field.", tc, pad);
+            info.addPara("Find the Rogue AI Core in the debris field.", tc, pad);
             return true;
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Return to the fleet that you aided with the AI core.", tc, pad);
@@ -706,4 +728,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         if(currentStage == Stage.GRAB_CORE && entity.isInOrNearSystem(system))
             getPerson().getMemoryWithoutUpdate().set("$riot_defendself", true);
     }
+
+    
 }

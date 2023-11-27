@@ -214,7 +214,9 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                     luddicpathFleet.getMemoryWithoutUpdate().unset("$riot_luddicpathpostbattle");
                     luddicpathFleet.getMemoryWithoutUpdate().set("$riot_luddicpathgoraid", true);
                 }
-                LazarusSystem.integrateMarket();
+                Global.getSector().getListenerManager().addListener(base);
+                //LazarusSystem.integrateMarket();
+                LazarusSystem.unHideMarket();
             }
         });
         endTrigger();
@@ -355,7 +357,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         //Second time called, betrayal fleet
         if(timesCalled == 2){
             if(winningFleet == tritachyonFleet){
-
+                            
                 
 
                 //Build the betrayal fleet
@@ -373,7 +375,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
                 tritachyonBetrayalFleet.setCommander(tritachyonCommander);
                 tritachyonBetrayalFleet.getFlagship().setCaptain(tritachyonCommander);
-                tritachyonBetrayalFleet.setLocation(LazarusSystem.GetYurei().getLocation().x, LazarusSystem.GetYurei().getLocation().y);
+                tritachyonBetrayalFleet.setLocation(LazarusSystem.GetCombatLoc1().getLocation().x, LazarusSystem.GetCombatLoc1().getLocation().y);
                 tritachyonBetrayalFleet.addAssignment(FleetAssignment.INTERCEPT, Global.getSector().getPlayerFleet(), 1000000f);
                 tritachyonBetrayalFleet.setNoFactionInName(true);
                 tritachyonBetrayalFleet.forceSync();
@@ -387,9 +389,10 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
-
+                tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
+                    new IsolatedBattleFleetInteractionConfigGen());
                 system.addEntity(tritachyonBetrayalFleet);
-                
+
                 //Despawn the original fleet
                 tritachyonFleet.getMemoryWithoutUpdate().unset("$riot_donotkill");
                 tritachyonFleet.despawn();
@@ -419,7 +422,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
                 luddicpathBetrayalFleet.setCommander(luddicpathCommander);
                 luddicpathBetrayalFleet.getFlagship().setCaptain(luddicpathCommander);
-                luddicpathBetrayalFleet.setLocation(LazarusSystem.GetYurei().getLocation().x, LazarusSystem.GetYurei().getLocation().y);
+                luddicpathBetrayalFleet.setLocation(LazarusSystem.GetCombatLoc1().getLocation().x, LazarusSystem.GetCombatLoc1().getLocation().y);
                 luddicpathBetrayalFleet.addAssignment(FleetAssignment.INTERCEPT, Global.getSector().getPlayerFleet(), 1000000f);
                 luddicpathBetrayalFleet.setNoFactionInName(true);
                 luddicpathBetrayalFleet.forceSync();
@@ -433,8 +436,12 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
-
+                luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
+                    new IsolatedBattleFleetInteractionConfigGen());
                 system.addEntity(luddicpathBetrayalFleet);
+
+                //Despawn the original fleet
+                luddicpathFleet.despawn();
             }
         }
 

@@ -346,7 +346,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
                 tritachyonBetrayalFleet.setCommander(tritachyonCommander);
                 tritachyonBetrayalFleet.getFlagship().setCaptain(tritachyonCommander);
-                tritachyonBetrayalFleet.setLocation(LazarusSystem.GetCombatLoc1().getLocation().x, LazarusSystem.GetCombatLoc1().getLocation().y);
+                tritachyonBetrayalFleet.setLocation(LazarusSystem.GetBetrayalSpawnLoc().getLocation().x, LazarusSystem.GetBetrayalSpawnLoc().getLocation().y);
                 tritachyonBetrayalFleet.addAssignment(FleetAssignment.INTERCEPT, Global.getSector().getPlayerFleet(), 1000000f);
                 tritachyonBetrayalFleet.setNoFactionInName(true);
                 tritachyonBetrayalFleet.forceSync();
@@ -388,7 +388,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
 
                 luddicpathBetrayalFleet.setCommander(luddicpathCommander);
                 luddicpathBetrayalFleet.getFlagship().setCaptain(luddicpathCommander);
-                luddicpathBetrayalFleet.setLocation(LazarusSystem.GetCombatLoc1().getLocation().x, LazarusSystem.GetCombatLoc1().getLocation().y);
+                luddicpathBetrayalFleet.setLocation(LazarusSystem.GetBetrayalSpawnLoc().getLocation().x, LazarusSystem.GetBetrayalSpawnLoc().getLocation().y);
                 luddicpathBetrayalFleet.addAssignment(FleetAssignment.INTERCEPT, Global.getSector().getPlayerFleet(), 1000000f);
                 luddicpathBetrayalFleet.setNoFactionInName(true);
                 luddicpathBetrayalFleet.forceSync();
@@ -471,19 +471,21 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         
 
 
-        //An attempt was made here ;-;
-        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        //BattleCreationContext dogfight = new BattleCreationContext(Global.getSector().getPlayerFleet(), FleetGoal.ATTACK, targetFleet, FleetGoal.ATTACK);
+        // BattleCreationContext dogfight = new BattleCreationContext(helpingFleet, FleetGoal.ATTACK, targetFleet, FleetGoal.ATTACK);
 
         // FleetInteractionDialogPluginImpl testPlugin = (FleetInteractionDialogPluginImpl)dialog.getPlugin();
 
         // FleetEncounterContext encounterContext = (FleetEncounterContext)testPlugin.getContext();
         
-        // encounterContext.setBattle(dialog.startBattle(dogfight));
+        // dialog.startBattle(dogfight);
+        // helpingFleet.setInteractionTarget(targetFleet);
+        // targetFleet.setInteractionTarget(helpingFleet);
         
-        // BattleAPI firstCombat = Global.getSector().getPlayerFleet().getBattle(); //Gets the battle the player is in
+        // BattleAPI firstCombat = helpingFleet.getBattle(); //Gets the battle the player is in
 
-        // firstCombat.join(helpingFleet);
+        // Global.getLogger(this.getClass()).info("Can helping fleet join battle? " + firstCombat.canJoin(Global.getSector().getPlayerFleet()));
+
+        // firstCombat.join(Global.getSector().getPlayerFleet());
         
         // helpingFleet.getBattle().uncombine();
         // helpingFleet.getBattle().genCombined();

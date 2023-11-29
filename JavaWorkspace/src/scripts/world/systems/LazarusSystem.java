@@ -117,11 +117,30 @@ public class LazarusSystem
         return (CustomCampaignEntityAPI)GetSystem().getMemoryWithoutUpdate().get("$riot_fleetcombatloc2");
     }
 
+    public static CustomCampaignEntityAPI GetBetrayalSpawnLoc()
+    {
+        CustomCampaignEntityAPI original = GetCombatLoc1();
+        float planetAngle = GetYurei().getCircularOrbitAngle();
+
+        float direction = GetCirculatOrbitDirection(planetAngle, original.getCircularOrbitAngle());
+
+        original.setCircularOrbitAngle(planetAngle + (15 * direction));
+
+        return original;
+    }
+
     private static float GetFleetCombatAngle()
     {
         float planetAngle = GetYurei().getCircularOrbitAngle();
         float jumpPointAngle = GetSystem().getEntityById("lazarus_jump").getCircularOrbitAngle();
-        float difference = jumpPointAngle - planetAngle;
+
+        float direction = GetCirculatOrbitDirection(planetAngle, jumpPointAngle);
+        return planetAngle + ((70f * (float)Math.random() + 45f) * direction) % 360f;
+    }
+
+    public static float GetCirculatOrbitDirection(float start, float target)
+    {
+        float difference = target - start;
         if (difference > 180f)
         {
             difference -= 360;
@@ -131,8 +150,7 @@ public class LazarusSystem
             difference += 360;
         }
 
-        float direction = Math.signum(difference);
-        return planetAngle + ((70f * (float)Math.random() + 45f) * direction) % 360f;
+        return Math.signum(difference);
     }
 
     // Delayed World Actions

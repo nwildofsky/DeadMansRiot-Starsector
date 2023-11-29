@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.ReputationActionResponsePlugin.ReputationAd
 import com.fs.starfarer.api.campaign.econ.Industry;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.listeners.ColonyPlayerHostileActListener;
+import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
 import com.fs.starfarer.api.campaign.listeners.ExtraSalvageShownListener;
 import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -41,7 +42,7 @@ import java.util.Map;
 import org.lazywizard.lazylib.campaign.CampaignUtils;
 
 
-public class Riot extends HubMissionWithBarEvent implements FleetEventListener, ColonyPlayerHostileActListener, ExtraSalvageShownListener
+public class Riot extends HubMissionWithBarEvent implements FleetEventListener, ColonyPlayerHostileActListener, ExtraSalvageShownListener, CurrentLocationChangedListener
 {
 
     // mission stages
@@ -54,7 +55,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         RAID_PLANET,
         GRAB_CORE,
         DEFEND_SELF,
-        CONTACT_GIVER,
+        LEAVE_OR_FIGHT,
         COMPLETED,
         FAILED,
     }
@@ -142,6 +143,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         setStageOnMemoryFlag(Stage.RAID_PLANET, person, "$riot_raidplanet");
         setStageOnMemoryFlag(Stage.GRAB_CORE, person, "$riot_grabcore");
         setStageOnMemoryFlag(Stage.DEFEND_SELF, person, "$riot_defendself");
+        setStageOnMemoryFlag(Stage.LEAVE_OR_FIGHT, person, "$riot_leaveorfight");
         setStageOnMemoryFlag(Stage.COMPLETED, person, "$riot_completed");
         setStageOnMemoryFlag(Stage.FAILED, person, "$riot_failed" );
         // set time limit and credit reward
@@ -245,8 +247,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         });
         endTrigger();
 
-        // Transition goal from DEFEND_SELF to CONTACT_GIVER
-        beginStageTrigger(Stage.CONTACT_GIVER);
+        // Transition goal from DEFEND_SELF to LEAVE_OR_FIGHT
+        beginStageTrigger(Stage.LEAVE_OR_FIGHT);
         triggerRunScriptAfterDelay(0f, new Script() {
             @Override
             public void run()
@@ -389,6 +391,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
+                tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
+                tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_AGGRESSIVE, true);
                 tritachyonBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
                     new IsolatedBattleFleetInteractionConfigGen());
                 system.addEntity(tritachyonBetrayalFleet);
@@ -436,6 +440,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.ENTITY_MISSION_IMPORTANT, true);
+                luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_HOSTILE, true);
                 luddicpathBetrayalFleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_INTERACTION_DIALOG_CONFIG_OVERRIDE_GEN, 
                     new IsolatedBattleFleetInteractionConfigGen());
                 system.addEntity(luddicpathBetrayalFleet);
@@ -476,6 +481,11 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         {
             getPerson().getMemoryWithoutUpdate().set("$riot_raidplanet", true);
             winningFleet.getMemoryWithoutUpdate().unset(MemFlags.ENTITY_MISSION_IMPORTANT);
+            return true;
+        }
+        if (action.equals("fightOrFlight"))
+        {
+            getPerson().getMemoryWithoutUpdate().set("$riot_leaveorfight", true);
             return true;
         }
         return false;
@@ -570,7 +580,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 Global.getLogger(this.getClass()).info("Luddic Path fleet wins!");
             }
         }
-        else if (currentStage == Stage.DEFEND_SELF)
+        else if (currentStage == Stage.LEAVE_OR_FIGHT)
         {
             if (battle.isInvolved(tritachyonBetrayalFleet) || battle.isInvolved(luddicpathBetrayalFleet))
             {
@@ -656,8 +666,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             info.addPara("Find the AI core in the debris field", opad);
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Report back to the fleet commander with the AI.", opad);
-        } else if (currentStage == Stage.CONTACT_GIVER) {
-            info.addPara("Go back to " + getPerson().getNameString() + ".", opad);
+        } else if (currentStage == Stage.LEAVE_OR_FIGHT) {
+            info.addPara("Leave the system or destroy the zombie fleet.", opad);
         }
         
     }
@@ -692,8 +702,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         } else if (currentStage == Stage.DEFEND_SELF) {
             info.addPara("Return to the fleet that you aided with the AI core.", tc, pad);
             return true;
-        } else if (currentStage == Stage.CONTACT_GIVER) {
-            info.addPara("Return to the bar that you accepted the mission in.", tc, pad);
+        } else if (currentStage == Stage.LEAVE_OR_FIGHT) {
+            info.addPara("Leave Lazarus or fight the zombie fleet", tc, pad);
             return true;
         }
         return false;
@@ -718,8 +728,8 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
             return getMapLocationFor(system.getCenter());
         else if (currentStage == Stage.DEFEND_SELF) 
             return getMapLocationFor(system.getCenter());
-        else if (currentStage == Stage.CONTACT_GIVER) 
-            return getMapLocationFor(initialMarket.getPrimaryEntity());
+        else if (currentStage == Stage.LEAVE_OR_FIGHT) 
+            return getMapLocationFor(system.getCenter());
         return null;
     }
 
@@ -734,6 +744,18 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
     {        
         if(currentStage == Stage.GRAB_CORE && entity.isInOrNearSystem(system))
             getPerson().getMemoryWithoutUpdate().set("$riot_defendself", true);
+    }
+
+    @Override
+    public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI current) 
+    {
+        if(currentStage == Stage.LEAVE_OR_FIGHT)
+        {
+            if(prev.getId().equals("lazarus") && !current.getId().equals("lazarus"))
+            {
+                getPerson().getMemoryWithoutUpdate().set("$riot_completed", true);
+            }
+        }
     }
 
     

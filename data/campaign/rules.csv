@@ -43,3 +43,10 @@ Call $global.riot_ref updateData",SetTextHighlights $riot_planetName,"""What are
 riot_luddicpathPreRaidOpen,OpenCommLink,"$entity.riot_luddicpathgoraid score:200
 Call $global.riot_ref updateData",SetTextHighlights $riot_planetName,"""What are you doing? Go raid $riot_planetName!""",cutCommLink:Cut the comm link,
 ,,,,,,
+riot_tritachBetrayal,OpenCommLink,$entity.riot_tritachfleetbetrayal score:100,,"""I see you've returned, Captain, and only slightly behind schedule. I trust you've retrieved our property? Excellent. If you would be so kind as to send it over and disable your ship's shields, it would be highly appreciated.""","riot_tritachBetrayalInfect:""What are you talking about?""",
+riot_tritachInfected,DialogOptionSelected,"$option == riot_tritachBetrayalInfect
+Call $global.riot_ref fightOrFlight",$entity.ignorePlayerCommRequests = true,"""Don't be ridiculous, Captain. You've seen firsthand the sorts of experiments contained on Yurei. If the public knew AI could reanimate the dead as puppets, the consequences would be disastrous for the Tri-Tachyon corporation. Ergo, you and your fleet met an unfortunate end, dashed to pieces by an asteroid field. Terrible tragedy, we'll hold you the cheapest funeral the board deems acceptable…wait, what are these readings? H-how did you- the Core! It's…infected our systems…y-you'll…pay for…t-t-rrrrrrRRRRRRAAAAHHHH!""", "cutCommLink:Cut the comm link",
+,,,,,,
+riot_luddicBetrayal,OpenCommLink,$entity.riot_luddicpathfleetbetrayal score:200,,"""Back from that hell and none the worse for wear, Ludd smiles upon you, Captain! Now that that's squirreled away, we can finally…what is this?""","riot_luddicBetrayalInfect:""What's happening?""",
+riot_luddicInfected,DialogOptionSelected,"$option == riot_luddicBetrayalInfect
+Call $global.riot_ref fightOrFlight",$entity.ignorePlayerCommRequests = true,"""Our ships, they're going out of control! My God, the only thing on the comms are groaning and screaming! W-what Devil did you find, Captain?! A machine, controlling people…this cannot be allowed to stand…C-Captain, you need…to…GGGRRRAAARRRGGHHH!""", "cutCommLink:Cut the comm link",

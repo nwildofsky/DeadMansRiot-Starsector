@@ -38,10 +38,10 @@ Call $global.riot_ref updateData
 Call $global.riot_ref startRaid","SetTextHighlights $riot_planetName","""Never again will those heathens infect the stars with their sacrilege. Listen well, Captain. The bounty those heretics sought after is still on $riot_planetName, a nearby planet. It's some kind of new devilish AI core, held within a fortified stronghold. Our fleet's taken heavy fire, we will need to hold this position for repairs. If you can retrieve that core from $riot_planetName, you'll have done humanity a favor she may never repay you.""",cutCommLink:Cut the comm link,
 ,,,,,,
 riot_tritachPreRaidOpen,OpenCommLink,"$entity.riot_tritachgoraid score:100
-Call $global.riot_ref updateData",SetTextHighlights $riot_planetName,"""What are you doing? Go raid $riot_planetName!""",cutCommLink:Cut the comm link,
+Call $global.riot_ref updateData",SetTextHighlights $riot_planetName,"""I'm not paid to engage in small talk, Captain. Recover our AI Core from the $riot_planetName research station now, before the incident report I'll have to write grows unbearable.""",cutCommLink:Cut the comm link,
 ,,,,,,
 riot_luddicpathPreRaidOpen,OpenCommLink,"$entity.riot_luddicpathgoraid score:200
-Call $global.riot_ref updateData",SetTextHighlights $riot_planetName,"""What are you doing? Go raid $riot_planetName!""",cutCommLink:Cut the comm link,
+Call $global.riot_ref updateData",SetTextHighlights $riot_planetName,"""Whenever you're prepared, Captain, you need to recover that AI core from $riot_planetName. Break through whatever hellish defenses they've constructed and retrieve that abomination before they can use it.""",cutCommLink:Cut the comm link,
 ,,,,,,
 riot_tritachBetrayal,OpenCommLink,$entity.riot_tritachfleetbetrayal score:100,,"""I see you've returned, Captain, and only slightly behind schedule. I trust you've retrieved our property? Excellent. If you would be so kind as to send it over and disable your ship's shields, it would be highly appreciated.""","riot_tritachBetrayalInfect:""What are you talking about?""",
 riot_tritachInfected,DialogOptionSelected,"$option == riot_tritachBetrayalInfect

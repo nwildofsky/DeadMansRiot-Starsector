@@ -171,7 +171,7 @@ public class LazarusSystem
         admin.setId("theta_ai_admin");
         admin.setFaction(Factions.INDEPENDENT);
         admin.setName(new FullName("Theta", "AI Core", FullName.Gender.ANY));
-        admin.setPortraitSprite("graphics/portraits/portrait_ai2.png");
+        admin.setPortraitSprite("graphics/portraits/portrait_ai4.png");
         admin.setPersonality("reckless");
         admin.setPostId(Ranks.POST_ADMINISTRATOR);
         admin.setRankId(Ranks.TERRORIST);

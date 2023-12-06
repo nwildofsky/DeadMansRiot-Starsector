@@ -512,27 +512,6 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
         Global.getSector().getPlayerFleet().getBattle().leave(Global.getSector().getPlayerFleet(), false);
         helpingFleet.getBattle().leave(helpingFleet, false);
         Global.getFactory().createBattle(helpingFleet, targetFleet);
-        
-
-
-        // BattleCreationContext dogfight = new BattleCreationContext(helpingFleet, FleetGoal.ATTACK, targetFleet, FleetGoal.ATTACK);
-
-        // FleetInteractionDialogPluginImpl testPlugin = (FleetInteractionDialogPluginImpl)dialog.getPlugin();
-
-        // FleetEncounterContext encounterContext = (FleetEncounterContext)testPlugin.getContext();
-        
-        // dialog.startBattle(dogfight);
-        // helpingFleet.setInteractionTarget(targetFleet);
-        // targetFleet.setInteractionTarget(helpingFleet);
-        
-        // BattleAPI firstCombat = helpingFleet.getBattle(); //Gets the battle the player is in
-
-        // Global.getLogger(this.getClass()).info("Can helping fleet join battle? " + firstCombat.canJoin(Global.getSector().getPlayerFleet()));
-
-        // firstCombat.join(Global.getSector().getPlayerFleet());
-        
-        // helpingFleet.getBattle().uncombine();
-        // helpingFleet.getBattle().genCombined();
     }
 
     // during the initial dialogue and in any dialogue where we use "Call $riot_ref updateData", these values will be put in memory
@@ -582,7 +561,7 @@ public class Riot extends HubMissionWithBarEvent implements FleetEventListener, 
                 Global.getLogger(this.getClass()).info("Luddic Path fleet wins!");
             }
         }
-        else if (currentStage == Stage.LEAVE_OR_FIGHT)
+        else if (currentStage == Stage.LEAVE_OR_FIGHT || currentStage == Stage.DEFEND_SELF)
         {
             if (battle.isInvolved(tritachyonBetrayalFleet) || battle.isInvolved(luddicpathBetrayalFleet))
             {

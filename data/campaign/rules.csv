@@ -30,12 +30,13 @@ Call $global.riot_ref helpLuddic
 Call $global.riot_ref updateStage","""Aye, there's hope for this system yet! Show no mercy, for none shall be given to you!""",cutCommLink:Cut the comm link,
 ,,,,,,
 riot_tritachPostBattleOpen,OpenCommLink,"$entity.riot_tritachpostbattle score:100
-Call $global.riot_ref updateData
-Call $global.riot_ref startRaid","SetTextHighlights $riot_planetName","""What drives those barbarians to disrupt our operations, I may never know. Regardless, you've done well in assisting us, Captain. The deal has changed. Since our ships have taken unscheduled damage, we will need to undergo maintenance. While this happens, you will retrieve an experimental AI core from a facility on $riot_planetName. I advise you to take the necessary precautions; it's more valuable than your ship and everyone on it.""",cutCommLink:Cut the comm link,
+Call $global.riot_ref updateData","Call $global.riot_ref startRaid","""What drives those barbarians to disrupt our operations, I may never know. Regardless, you've done well in assisting us, Captain. The deal has changed. Since our ships have taken unscheduled damage, we will need to undergo maintenance.""",riot_tritachPostBattleGoRaid:Continue,
+riot_tritachPostBattleGoRaid,DialogOptionSelected,$option == riot_tritachPostBattleGoRaid,SetTextHighlights $riot_planetName,"""While this happens, you will retrieve an experimental AI core from a facility on $riot_planetName. I advise you to take the necessary precautions; it's more valuable than your ship and everyone on it.""",cutCommLink:Cut the comm link,
 ,,,,,,
 riot_luddicpathPostBattleOpen,OpenCommLink,"$entity.riot_luddicpathpostbattle score:200
-Call $global.riot_ref updateData
-Call $global.riot_ref startRaid","SetTextHighlights $riot_planetName","""Never again will those heathens infect the stars with their sacrilege. Listen well, Captain. The bounty those heretics sought after is still on $riot_planetName, a nearby planet. It's some kind of new devilish AI core, held within a fortified stronghold. Our fleet's taken heavy fire, we will need to hold this position for repairs. If you can retrieve that core from $riot_planetName, you'll have done humanity a favor she may never repay you.""",cutCommLink:Cut the comm link,
+Call $global.riot_ref updateData","SetTextHighlights $riot_planetName
+Call $global.riot_ref startRaid","""Never again will those heathens infect the stars with their sacrilege. Listen well, Captain. The bounty those heretics sought after is still on $riot_planetName, a nearby planet.""",riot_luddicpathPostBattleGoRaid:Continue,
+riot_luddicpathPostBattleGoRaid,DialogOptionSelected,$option == riot_luddicpathPostBattleGoRaid,SetTextHighlights $riot_planetName,"""It's some kind of new devilish AI core, held within a fortified stronghold. Our fleet's taken heavy fire, we will need to hold this position for repairs. If you can retrieve that core from $riot_planetName, you'll have done humanity a favor she may never repay you.""",cutCommLink:Cut the comm link,
 ,,,,,,
 riot_tritachPreRaidOpen,OpenCommLink,"$entity.riot_tritachgoraid score:100
 Call $global.riot_ref updateData",SetTextHighlights $riot_planetName,"""I'm not paid to engage in small talk, Captain. Recover our AI Core from the $riot_planetName research station now, before the incident report I'll have to write grows unbearable.""",cutCommLink:Cut the comm link,
@@ -50,3 +51,8 @@ Call $global.riot_ref fightOrFlight",$entity.ignorePlayerCommRequests = true,"""
 riot_luddicBetrayal,OpenCommLink,$entity.riot_luddicpathfleetbetrayal score:200,,"""Back from that hell and none the worse for wear, Ludd smiles upon you, Captain! Now that that's squirreled away, we can finally…what is this?""","riot_luddicBetrayalInfect:""What's happening?""",
 riot_luddicInfected,DialogOptionSelected,"$option == riot_luddicBetrayalInfect
 Call $global.riot_ref fightOrFlight",$entity.ignorePlayerCommRequests = true,"""Our ships, they're going out of control! My God, the only thing on the comms are groaning and screaming! W-what Devil did you find, Captain?! A machine, controlling people…this cannot be allowed to stand…C-Captain, you need…to…GGGRRRAAARRRGGHHH!""", "cutCommLink:Cut the comm link",
+,,,,,,
+riot_luddicpathDerelict,ShowSalvageEntityDetails,"$riot_luddicDerelict score:100
+$customType == wreck",,"As you approach a floating chunk of debris, you identify it as a ruined Luddic Path ship, but the damage it has sustained seems…off. Smashed panels with no energy or shrapnel burns indicates it was rammed, but that's what Luddic ships are built for. Why was this ship attacked by one of its allies?",,
+riot_tritachDerelict,ShowSalvageEntityDetails,"$riot_tritachDerelict score:100
+$customType == wreck",,"You see the smoldering wreck of a Tri-Tachyon cruiser. Its pristine hull is marred by burns and gouges left by energy weapons, but…the only ships strong enough to leave energy damage of this caliber are also Tri-Tachyon. Was it fired on by one of its own ships?",,

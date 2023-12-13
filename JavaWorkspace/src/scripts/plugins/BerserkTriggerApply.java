@@ -36,7 +36,7 @@ public class BerserkTriggerApply implements OnHitEffectPlugin {
 
 
                   //See BerserkTriggerEffect for the internals
-                  BerserkTriggerEffect effect = new BerserkTriggerEffect(proj, (ShipAPI)target, offset, alpha, 10);
+                  BerserkTriggerEffect effect = new BerserkTriggerEffect(proj, (ShipAPI)target, offset, alpha, 25);
                   CombatEntityAPI e = engine.addLayeredRenderingPlugin(effect);
                   e.getLocation().set(proj.getLocation());
               }

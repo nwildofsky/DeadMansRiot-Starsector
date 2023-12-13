@@ -363,6 +363,11 @@ public class LazarusSystem
         SectorEntityToken shipwreckA2 = addDerelict(system, jumpPoint, "lasher_luddic_path_Raider", ShipCondition.WRECKED, shipwreckJumpDist, false);
         SectorEntityToken shipwreckA3 = addDerelict(system, jumpPoint, "cerberus_luddic_path_Attack", ShipCondition.WRECKED, shipwreckJumpDist, false);
 
+        shipwreckA1.getMemoryWithoutUpdate().set("$riot_luddicDerelict", true);
+        shipwreckA2.getMemoryWithoutUpdate().set("$riot_luddicDerelict", true);
+        shipwreckA3.getMemoryWithoutUpdate().set("$riot_luddicDerelict", true);
+
+
 
         DebrisFieldParams debrisParams = new DebrisFieldParams(
             400f,      // field radius - should not go above 1000 for performance reasons
@@ -383,6 +388,13 @@ public class LazarusSystem
         SectorEntityToken shipwreckB3 = addDerelict(system, erythemaStar, "aurora_Balanced", ShipCondition.WRECKED, shipwreckStarDist, false);
         SectorEntityToken shipwreckB4 = addDerelict(system, erythemaStar, "medusa_Attack", ShipCondition.WRECKED, shipwreckStarDist, false);
         SectorEntityToken shipwreckB5 = addDerelict(system, erythemaStar, "shade_Assault", ShipCondition.WRECKED, shipwreckStarDist, false);
+
+        shipwreckB1.getMemoryWithoutUpdate().set("$riot_tritachDerelict", true);
+        shipwreckB2.getMemoryWithoutUpdate().set("$riot_tritachDerelict", true);
+        shipwreckB3.getMemoryWithoutUpdate().set("$riot_tritachDerelict", true);
+        shipwreckB4.getMemoryWithoutUpdate().set("$riot_tritachDerelict", true);
+        shipwreckB5.getMemoryWithoutUpdate().set("$riot_tritachDerelict", true);
+
 
 		SectorEntityToken debrisANextToStar = Misc.addDebrisField(system, debrisParams, StarSystemGenerator.random);
 		debrisANextToStar.setSensorProfile(null);

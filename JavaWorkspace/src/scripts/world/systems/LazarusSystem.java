@@ -41,6 +41,7 @@ public class LazarusSystem
     final float shipwreckStarDist = 1200f;
     final float wreckDebrisStarDist = shipwreckStarDist + 20f;
     final float gateDist = 6800f;
+    final float abandonedStationDist = 1800;
 
     // Static Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Getters
@@ -279,6 +280,16 @@ public class LazarusSystem
 		yurei.setMarket(yureiMarket);
         yureiMarket.setHidden(true);
         integrateMarket();
+        //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        //#region Abandoned Station ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		SectorEntityToken abandonedStation = system.addCustomEntity("lazarus_abandoned_station",
+				"Abandoned Tri-Tachyon Spaceport", "station_side06", "neutral");
+		
+		abandonedStation.setCircularOrbitPointingDown(erythemaStar, 360 * (float)Math.random(), abandonedStationDist, 200);
+		abandonedStation.setCustomDescriptionId("lazarus_station_abandoned");
+		abandonedStation.setInteractionImage("illustrations", "abandoned_station2");
+		Misc.setAbandonedStationMarket("lazarus_abandoned_station_market", abandonedStation);
         //#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
